@@ -25,4 +25,7 @@ export class CreateUsuarioDto {
 
   @IsNumber({}, { message: 'Status inválido!' })
   status?: number;
+
+  @IsString({ message: 'Status inválido!' })
+  unidade_id: string;
 }

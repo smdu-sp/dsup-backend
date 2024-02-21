@@ -5,11 +5,11 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">Base de desenvolvimento Backend - SMUL/ATIC</p>
+  <p align="center">DSUP - Gestão de chamados de Serviço e Suporte</p>
 
 ## Descrição
 
-Base de desenvolvimento backend de SMUL/ATIC:
+DSUP - Gestão de chamados de Serviço e Suporte:
 
 - NESTJS: https://docs.nestjs.com/
 - PRISMAIO: https://www.prisma.io/docs/getting-started

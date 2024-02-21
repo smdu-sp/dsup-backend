@@ -12,8 +12,8 @@ datasource db {
 
 enum Permissao {
   DEV
-  SUP
   ADM
+  TEC
   USR
 }
 
@@ -29,5 +29,65 @@ model Usuario {
   criadoEm      DateTime    @default(now())
   atualizadoEm  DateTime    @default(now()) @updatedAt
 
+  ordens      Ordem[]
+  servicos    Servico[]
+  unidade     Unidade   @relation(fields: [unidade_id], references: [id])
+  unidade_id  String
+
   @@map("usuarios")
+}
+
+model Unidade {
+  id        String    @id @default(uuid())
+  nome      String    @unique
+  sigla     String    @unique
+  usuarios  Usuario[]
+
+  @@map("unidades")
+}
+
+model Ordem {
+  id                String    @id @default(uuid())
+  local             String
+  solicitante       Usuario   @relation(fields: [solicitante_id], references: [id])
+  solicitante_id    String
+  data_solicitacao  DateTime  @default(now())
+  tipo              Int       @default(0)
+  observacoes       String
+  servicos          Servico[]
+
+  @@map("ordens")
+}
+
+model Servico {
+  id                  String              @id @default(uuid())
+  tecnico             Usuario             @relation(fields: [tecnico_id], references: [id])
+  tecnico_id          String
+  data_inicio         DateTime
+  status              Int                 @default(0)
+  servicos_materiais  Servico_Material[]
+  ordem               Ordem               @relation(fields: [ordem_id], references: [id])
+  ordem_id            String
+
+  @@map("servicos")
+}
+
+model Material {
+  id                  String              @id @default(uuid())
+  nome                String              @unique
+  servicos_materiais  Servico_Material[]
+
+  @@map("materiais")
+}
+
+model Servico_Material {
+  servico     Servico   @relation(fields: [servico_id], references: [id])
+  servico_id  String
+  material    Material  @relation(fields: [material_id], references: [id])
+  material_id String
+  quantidade  Int
+  medida      String
+
+  @@unique([servico_id, material_id])
+  @@map("servicos_materiais")
 }

@@ -43,7 +43,9 @@ export class AuthService {
     await new Promise<void>((resolve, reject) => {
       client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err) => {
         if (err) {
+          console.log(err);
           client.destroy();
+          console.log('veio aqui 3');
           reject(new UnauthorizedException('Credenciais incorretas.'));
         }
         resolve();
@@ -75,6 +77,7 @@ export class AuthService {
                 login,
                 email,
                 permissao: 'USR',
+                unidade_id: 'be655ad1-027a-4413-bb3f-d1b6cb4df439',
                 status: 1,
               });
               client.destroy();
