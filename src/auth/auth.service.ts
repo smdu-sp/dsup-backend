@@ -45,7 +45,6 @@ export class AuthService {
         if (err) {
           console.log(err);
           client.destroy();
-          console.log('veio aqui 3');
           reject(new UnauthorizedException('Credenciais incorretas.'));
         }
         resolve();
@@ -77,7 +76,6 @@ export class AuthService {
                 login,
                 email,
                 permissao: 'USR',
-                unidade_id: 'be655ad1-027a-4413-bb3f-d1b6cb4df439',
                 status: 1,
               });
               client.destroy();

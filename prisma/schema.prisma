@@ -31,8 +31,8 @@ model Usuario {
 
   ordens      Ordem[]
   servicos    Servico[]
-  unidade     Unidade   @relation(fields: [unidade_id], references: [id])
-  unidade_id  String
+  unidade     Unidade?   @relation(fields: [unidade_id], references: [id])
+  unidade_id  String?
 
   @@map("usuarios")
 }

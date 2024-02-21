@@ -24,15 +24,15 @@ export class UsuariosService {
     console.log({ permissao, permissaoCriador });
     if (
       permissao === $Enums.Permissao.DEV &&
-      permissaoCriador === $Enums.Permissao.SUP
-    )
-      permissao = $Enums.Permissao.SUP;
-    if (
-      (permissao === $Enums.Permissao.DEV ||
-        permissao === $Enums.Permissao.SUP) &&
       permissaoCriador === $Enums.Permissao.ADM
     )
       permissao = $Enums.Permissao.ADM;
+    if (
+      (permissao === $Enums.Permissao.DEV ||
+        permissao === $Enums.Permissao.ADM) &&
+      permissaoCriador === $Enums.Permissao.TEC
+    )
+      permissao = $Enums.Permissao.TEC;
     return permissao;
   }
 

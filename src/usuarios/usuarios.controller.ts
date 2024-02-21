@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Post,
+  // Post,
   Body,
   Patch,
   Param,
@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
+// import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
@@ -19,14 +19,14 @@ import { Usuario } from '@prisma/client';
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  @Permissoes('SUP', 'ADM')
-  @Post('criar') //localhost:3000/usuarios/criar
-  criar(
-    @UsuarioAtual() usuario: Usuario,
-    @Body() createUsuarioDto: CreateUsuarioDto,
-  ) {
-    return this.usuariosService.criar(createUsuarioDto, usuario);
-  }
+  // @Permissoes('SUP', 'ADM')
+  // @Post('criar') //localhost:3000/usuarios/criar
+  // criar(
+  //   @UsuarioAtual() usuario: Usuario,
+  //   @Body() createUsuarioDto: CreateUsuarioDto,
+  // ) {
+  //   return this.usuariosService.criar(createUsuarioDto, usuario);
+  // }
 
   @Permissoes('SUP', 'ADM')
   @Get('buscar-tudo') //localhost:3000/usuarios/buscar-tudo

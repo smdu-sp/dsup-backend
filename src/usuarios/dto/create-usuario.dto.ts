@@ -27,5 +27,5 @@ export class CreateUsuarioDto {
   status?: number;
 
   @IsString({ message: 'Status inválido!' })
-  unidade_id: string;
+  unidade_id?: string;
 }

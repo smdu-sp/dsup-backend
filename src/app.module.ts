@@ -7,9 +7,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { PrismaModule } from './prisma/prisma.module';
+import { UnidadesModule } from './unidades/unidades.module';
+import { OracleModule } from './oracle/oracle.module';
 
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, UnidadesModule, OracleModule],
   controllers: [AppController],
   providers: [
     AppService,
