@@ -1,15 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Global, Injectable } from '@nestjs/common';
 import OracleDB, { Connection } from 'oracledb';
 
+@Global()
 @Injectable()
 export class OracleService {
-    constructor(
-        private oracledb: any
-    ) {
-        this.oracledb = OracleDB;
+    private oracledb = OracleDB;
+    constructor() {
     }
 
-    async connection(): Promise<Connection> {
+    async connection() {
         const connect: Connection = await this.oracledb.getConnection({
             user          : process.env.ORACLEDB_USER,
             password      : process.env.ORACLEDB_PASSWORD,
@@ -20,6 +19,6 @@ export class OracleService {
     }
 
     async disconnect() {
-        this.oracledb.close();
+        await (await this.connection()).close();
     }
 }

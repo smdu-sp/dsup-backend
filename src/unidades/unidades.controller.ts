@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UnidadesService } from './unidades.service';
 import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('unidades')
 export class UnidadesController {
@@ -15,6 +16,12 @@ export class UnidadesController {
   @Get()
   findAll() {
     return this.unidadesService.findAll();
+  }
+
+  @IsPublic()
+  @Get('teste')
+  testaConexao() {
+    return this.unidadesService.testaConexao();
   }
 
   @Get(':id')

@@ -3,6 +3,7 @@ import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OracleService } from 'src/oracle/oracle.service';
+import { Connection } from 'oracledb';
 
 class SOE5P03_LISTA_ZONA_VO {
   // Define the constructor
@@ -60,7 +61,6 @@ class SOE5P03_LISTA_ZONA_VO {
 export class UnidadesService {
   constructor(
     private prisma: PrismaService,
-    private oracledb: OracleService
   ) {}
 
   create(createUnidadeDto: CreateUnidadeDto) {
@@ -85,6 +85,26 @@ export class UnidadesService {
     return `This action removes a #${id} unidade`;
   }
 
+  async testaConexao() {
+    const oracledb = require('oracledb');
+    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+    oracledb.initOracleClient();
+    const objConn: Connection = await oracledb.getConnection({
+      user          : process.env.ORACLEDB_USER,
+      password      : process.env.ORACLEDB_PASSWORD,
+      connectString : "cprodamibs6525.PRODAM:1521/ORA011"
+    });
+    console.log(await objConn.execute(`
+      SELECT 
+          owner,
+          object_name
+      FROM 
+          all_procedures
+      WHERE
+          object_type = 'PROCEDURE'
+    `));
+  }
+
   async pesquisaZonasDeUso(P_COD_OPEA: string) {
       const objConsulta = {
         P_COD_OPEA: P_COD_OPEA
@@ -93,8 +113,8 @@ export class UnidadesService {
       let objUsuarioVO = new SOE5P03_LISTA_ZONA_VO();
       let objListaUsuarioVO = [];
 
-      const objConn = await this.oracledb.connection();
-      const objCmd = objConn.execute(strStoredProcedure, objConsulta);
+      // const objConn = await this.oracledb.connection();
+      // const objCmd = objConn.execute(strStoredProcedure, objConsulta);
       let objTrans = null;
 
       // try {
