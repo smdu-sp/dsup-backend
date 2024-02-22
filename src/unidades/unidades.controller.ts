@@ -9,6 +9,7 @@ import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 export class UnidadesController {
   constructor(private readonly unidadesService: UnidadesService) {}
 
+  @Permissoes('ADM')
   @Post('criar')
   criar(@Body() createUnidadeDto: CreateUnidadeDto) {
     return this.unidadesService.criar(createUnidadeDto);

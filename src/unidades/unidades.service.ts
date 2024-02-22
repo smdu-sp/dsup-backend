@@ -16,6 +16,7 @@ export class UnidadesService {
     const unidade = await this.prisma.unidade.findUnique({
       where: { codigo }
     });
+    console.log(unidade);
     return unidade;
   }
 
@@ -34,12 +35,12 @@ export class UnidadesService {
   }
 
   async criar(createUnidadeDto: CreateUnidadeDto) {
-    const { nome, sigla, status, codigo } = createUnidadeDto;
-    if (this.buscaPorCodigo(codigo)) throw new ForbiddenException('Ja existe uma unidade com o mesmo código');
-    if (this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma unidade com o mesmo nome');
-    if (this.buscaPorSigla(sigla)) throw new ForbiddenException('Ja existe uma unidade com a mesmo sigla');
+    const { nome, sigla, codigo } = createUnidadeDto;
+    if (await this.buscaPorCodigo(codigo)) throw new ForbiddenException('Ja existe uma unidade com o mesmo código');
+    if (await this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma unidade com o mesmo nome');
+    if (await this.buscaPorSigla(sigla)) throw new ForbiddenException('Ja existe uma unidade com a mesmo sigla');
     const novaUnidade = await this.prisma.unidade.create({
-      data: { nome, sigla, status, codigo }
+      data: { nome, sigla, status: true, codigo }
     });
     if (!novaUnidade) throw new InternalServerErrorException('Não foi possível criar a unidade. Tente novamente.');
     return novaUnidade;
@@ -83,12 +84,18 @@ export class UnidadesService {
     const { nome, sigla, codigo } = updateUnidadeDto;
     const unidade = await this.prisma.unidade.findUnique({ where: { id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
-    const unidadeNome = await this.buscaPorNome(nome);
-    if (unidadeNome && unidadeNome.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo nome.');
-    const unidadeSigla = await this.buscaPorSigla(sigla);
-    if (unidadeSigla && unidadeSigla.id != id) throw new ForbiddenException('Já existe uma unidade com a mesma sigla.');
-    const unidadeCodigo = await this.buscaPorCodigo(codigo);
-    if (unidadeCodigo && unidadeCodigo.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo código.');
+    if (nome) {
+      const unidadeNome = await this.buscaPorNome(nome);
+      if (unidadeNome && unidadeNome.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo nome.');
+    }
+    if (sigla) {
+      const unidadeSigla = await this.buscaPorSigla(sigla);
+      if (unidadeSigla && unidadeSigla.id != id) throw new ForbiddenException('Já existe uma unidade com a mesma sigla.');
+    }
+    if (codigo) {
+      const unidadeCodigo = await this.buscaPorCodigo(codigo);
+      if (unidadeCodigo && unidadeCodigo.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo código.');
+    }
     const updatedUnidade = await this.prisma.unidade.update({
       where: { id },
       data: updateUnidadeDto
