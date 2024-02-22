@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -8,10 +8,11 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RoleGuard } from './auth/guards/role.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { UnidadesModule } from './unidades/unidades.module';
-import { OracleModule } from './oracle/oracle.module';
 
+@Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, UnidadesModule, OracleModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, UnidadesModule],
+  exports: [AppService],
   controllers: [AppController],
   providers: [
     AppService,

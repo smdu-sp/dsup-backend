@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
+  // Delete,
   Query,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
@@ -28,7 +28,7 @@ export class UsuariosController {
   //   return this.usuariosService.criar(createUsuarioDto, usuario);
   // }
 
-  @Permissoes('SUP', 'ADM')
+  @Permissoes('ADM')
   @Get('buscar-tudo') //localhost:3000/usuarios/buscar-tudo
   buscarTudo(
     @Query('pagina') pagina?: string,
@@ -39,13 +39,13 @@ export class UsuariosController {
     return this.usuariosService.buscarTudo(+pagina, +limite, +status, busca);
   }
 
-  @Permissoes('SUP', 'ADM')
+  @Permissoes('ADM')
   @Get('buscar-por-id/:id') //localhost:3000/usuarios/buscar-por-id/id
   buscarPorId(@Param('id') id: string) {
     return this.usuariosService.buscarPorId(id);
   }
 
-  @Permissoes('SUP', 'ADM')
+  @Permissoes('ADM')
   @Patch('atualizar/:id') //localhost:3000/usuarios/atualizar/id
   atualizar(
     @UsuarioAtual() usuario: Usuario,
@@ -55,13 +55,13 @@ export class UsuariosController {
     return this.usuariosService.atualizar(usuario, id, updateUsuarioDto);
   }
 
-  @Permissoes('SUP')
-  @Delete('excluir/:id') //localhost:3000/usuarios/excluir/id
-  excluir(@Param('id') id: string) {
-    return this.usuariosService.excluir(id);
-  }
+  // @Permissoes('SUP')
+  // @Delete('excluir/:id') //localhost:3000/usuarios/excluir/id
+  // excluir(@Param('id') id: string) {
+  //   return this.usuariosService.excluir(id);
+  // }
 
-  @Permissoes('SUP', 'ADM')
+  @Permissoes('ADM')
   @Patch('autorizar/:id')
   autorizarUsuario(@Param('id') id: string) {
     return this.usuariosService.autorizaUsuario(id);

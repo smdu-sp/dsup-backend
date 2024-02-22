@@ -41,6 +41,8 @@ model Unidade {
   id        String    @id @default(uuid())
   nome      String    @unique
   sigla     String    @unique
+  codigo    String    @unique
+  status    Boolean   @default(true)
   usuarios  Usuario[]
 
   @@map("unidades")

@@ -1,165 +1,134 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { OracleService } from 'src/oracle/oracle.service';
-import { Connection } from 'oracledb';
+import { AppService } from 'src/app.service';
+// import { Connection } from 'oracledb';
 
-class SOE5P03_LISTA_ZONA_VO {
-  // Define the constructor
-  constructor(
-    private _P_COD_OPEA?: string,
-    private _P_COD_ZONA?: string,
-    private _P_SGL_ZONA?: string,
-    private _P_TXT_DCR_ZONA?: string,
-    private _P_MENS_ERRO?: string
-  ) {
-      this._P_COD_OPEA = '';
-      this._P_COD_ZONA = '';
-      this._P_SGL_ZONA = '';
-      this._P_TXT_DCR_ZONA = '';
-      this._P_MENS_ERRO = '';
-  }
-
-  // Define the properties
-  get P_COD_OPEA() {
-      return this._P_COD_OPEA;
-  }
-  set P_COD_OPEA(value) {
-      this._P_COD_OPEA = value;
-  }
-
-  get P_COD_ZONA() {
-      return this._P_COD_ZONA;
-  }
-  set P_COD_ZONA(value) {
-      this._P_COD_ZONA = value;
-  }
-
-  get P_SGL_ZONA() {
-      return this._P_SGL_ZONA;
-  }
-  set P_SGL_ZONA(value) {
-      this._P_SGL_ZONA = value;
-  }
-
-  get P_TXT_DCR_ZONA() {
-      return this._P_TXT_DCR_ZONA;
-  }
-  set P_TXT_DCR_ZONA(value) {
-      this._P_TXT_DCR_ZONA = value;
-  }
-
-  get P_MENS_ERRO() {
-      return this._P_MENS_ERRO;
-  }
-  set P_MENS_ERRO(value) {
-      this._P_MENS_ERRO = value;
-  }
-}
 @Injectable()
 export class UnidadesService {
   constructor(
     private prisma: PrismaService,
+    private app: AppService
   ) {}
 
-  create(createUnidadeDto: CreateUnidadeDto) {
-    const novaUnidade = this.prisma.unidade.create({
-      data: createUnidadeDto
-    })
-  }
-
-  findAll() {
-    return `This action returns all unidades`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} unidade`;
-  }
-
-  update(id: number, updateUnidadeDto: UpdateUnidadeDto) {
-    return `This action updates a #${id} unidade`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} unidade`;
-  }
-
-  async testaConexao() {
-    const oracledb = require('oracledb');
-    oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-    oracledb.initOracleClient();
-    const objConn: Connection = await oracledb.getConnection({
-      user          : process.env.ORACLEDB_USER,
-      password      : process.env.ORACLEDB_PASSWORD,
-      connectString : "cprodamibs6525.PRODAM:1521/ORA011"
+  async buscaPorCodigo(codigo: string) {
+    const unidade = await this.prisma.unidade.findUnique({
+      where: { codigo }
     });
-    console.log(await objConn.execute(`
-      SELECT 
-          owner,
-          object_name
-      FROM 
-          all_procedures
-      WHERE
-          object_type = 'PROCEDURE'
-    `));
+    return unidade;
   }
 
-  async pesquisaZonasDeUso(P_COD_OPEA: string) {
-      const objConsulta = {
-        P_COD_OPEA: P_COD_OPEA
-      }
-      const strStoredProcedure = "SOE5P03.SOE5P03_LISTA_ZONA";
-      let objUsuarioVO = new SOE5P03_LISTA_ZONA_VO();
-      let objListaUsuarioVO = [];
-
-      // const objConn = await this.oracledb.connection();
-      // const objCmd = objConn.execute(strStoredProcedure, objConsulta);
-      let objTrans = null;
-
-      // try {
-      //     let dtReader = this.oracledb.;
-      //     objConn.Open();
-      // try {
-      //     objTrans = objConn.BeginTransaction(IsolationLevel.ReadCommitted);
-      // } catch (error) {}
-
-      // objCmd.Connection = objConn;
-      // objCmd.CommandType = CommandType.StoredProcedure;
-      // objCmd.CommandText = strStoredProcedure;
-      // objCmd.Transaction = objTrans;
-
-      // // Parametros de Entrada
-      // objCmd.Parameters.AddWithValue("P_COD_OPEA", objConsulta.P_COD_OPEA).Direction = ParameterDirection.Input;
-      // // Parametros de Entrada
-
-      // // Parametros de Saida
-      // objCmd.Parameters.Add("P_MENS_ERRO", OracleType.VarChar, 2000).Direction = ParameterDirection.Output;
-      // objCmd.Parameters.Add("P_CURSOR", OracleType.Cursor).Direction = ParameterDirection.Output;
-      // // Parametros de Saida
-
-      // dtReader = objCmd.ExecuteReader();
-
-      // while (dtReader.Read()) {
-      //     objUsuarioVO = new SOE5P03_LISTA_ZONA_VO();
-      //     objUsuarioVO.P_COD_ZONA = dtReader["P_COD_ZONA"].toString();
-      //     objUsuarioVO.P_SGL_ZONA = dtReader["P_SGL_ZONA"].toString();
-      //     objUsuarioVO.P_TXT_DCR_ZONA = dtReader["P_TXT_DCR_ZONA"].toString();
-      //     objUsuarioVO.P_MENS_ERRO = objCmd.Parameters["P_MENS_ERRO"].Value.toString();
-      //     objListaUsuarioVO.push(objUsuarioVO);
-      // }
-      // } catch (ex) {
-      // objUsuarioVO = new SOE5P03_LISTA_ZONA_VO();
-      // objUsuarioVO.P_MENS_ERRO = ex.message.toString() + " - " + (objCmd.Parameters["P_MENS_ERRO"].Value === null || objCmd.Parameters["P_MENS_ERRO"].Value === undefined ? "" : objCmd.Parameters["P_MENS_ERRO"].Value);
-      // objListaUsuarioVO.push(objUsuarioVO);
-      // } finally {
-      // try {
-      //     objTrans.Rollback();
-      // } catch (error) {}
-
-      // objConn.Close();
-      // }
-
-      return objListaUsuarioVO;
+  async buscaPorSigla(sigla: string) {
+    const unidade = await this.prisma.unidade.findUnique({
+      where: { sigla }
+    });
+    return unidade;
   }
+
+  async buscaPorNome(nome: string) {
+    const unidade = await this.prisma.unidade.findUnique({
+      where: { nome }
+    });
+    return unidade;
+  }
+
+  async criar(createUnidadeDto: CreateUnidadeDto) {
+    const { nome, sigla, status, codigo } = createUnidadeDto;
+    if (this.buscaPorCodigo(codigo)) throw new ForbiddenException('Ja existe uma unidade com o mesmo código');
+    if (this.buscaPorNome(nome)) throw new ForbiddenException('Ja existe uma unidade com o mesmo nome');
+    if (this.buscaPorSigla(sigla)) throw new ForbiddenException('Ja existe uma unidade com a mesmo sigla');
+    const novaUnidade = await this.prisma.unidade.create({
+      data: { nome, sigla, status, codigo }
+    });
+    if (!novaUnidade) throw new InternalServerErrorException('Não foi possível criar a unidade. Tente novamente.');
+    return novaUnidade;
+  }
+
+  async buscarTudo(
+    pagina: number = 1,
+    limite: number = 10,
+    status: string = 'all',
+    busca?: string
+  ) {
+    [pagina, limite] = this.app.verificaPagina(pagina, limite);
+    const searchParams = {
+      ...(busca ? { nome: { contains: busca } } : {}),
+      ...(status == 'all' ? {} : { status: status === 'true' }),
+    };
+    const total = await this.prisma.unidade.count({ where: searchParams });
+    if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
+    [pagina, limite] = this.app.verificaLimite(pagina, limite, total);
+    const unidades = await this.prisma.unidade.findMany({
+      where: searchParams,
+      orderBy: { codigo: 'asc' },
+      skip: (pagina - 1) * limite,
+      take: limite,
+    });
+    return {
+      total: +total,
+      pagina: +pagina,
+      limite: +limite,
+      data: unidades
+    };
+  }
+
+  async buscarPorId(id: string) {
+    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+    if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
+    return unidade;
+  }
+
+  async atualizar(id: string, updateUnidadeDto: UpdateUnidadeDto) {
+    const { nome, sigla, codigo } = updateUnidadeDto;
+    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+    if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
+    const unidadeNome = await this.buscaPorNome(nome);
+    if (unidadeNome && unidadeNome.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo nome.');
+    const unidadeSigla = await this.buscaPorSigla(sigla);
+    if (unidadeSigla && unidadeSigla.id != id) throw new ForbiddenException('Já existe uma unidade com a mesma sigla.');
+    const unidadeCodigo = await this.buscaPorCodigo(codigo);
+    if (unidadeCodigo && unidadeCodigo.id != id) throw new ForbiddenException('Já existe uma unidade com o mesmo código.');
+    const updatedUnidade = await this.prisma.unidade.update({
+      where: { id },
+      data: updateUnidadeDto
+    });
+    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível atualizar a unidade. Tente novamente.');
+    return updatedUnidade;
+  }
+
+  async desativar(id: string) {
+    const unidade = await this.prisma.unidade.findUnique({ where: { id } });
+    if (!unidade) throw new ForbiddenException('Unidade não encontrada.');
+    const updatedUnidade = await this.prisma.unidade.update({
+      where: { id },
+      data: { status: false }
+    });
+    if (!updatedUnidade) throw new InternalServerErrorException('Não foi possível desativar a unidade. Tente novamente.');
+    return {
+      message: 'Unidade desativada com sucesso.'
+    }
+  }
+
+  // async testaConexao() {
+  //   const oracledb = require('oracledb');
+  //   oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
+  //   oracledb.initOracleClient();
+  //   const objConn: Connection = await oracledb.getConnection({
+  //     user          : process.env.ORACLEDB_USER,
+  //     password      : process.env.ORACLEDB_PASSWORD,
+  //     connectString : "cprodamibs6525.PRODAM:1521/ORA011"
+  //   });
+  //   console.log(await objConn.execute(`
+  //     CALL SOE5P03(d634035)
+  //   `));
+  //   console.log(await objConn.execute(`
+  //     SELECT 
+  //         *
+  //     FROM 
+  //         all_objects
+  //     WHERE
+  //         object_name = 'SOE5P03'
+  //   `));
+  // }
 }

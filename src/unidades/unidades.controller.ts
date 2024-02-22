@@ -1,41 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UnidadesService } from './unidades.service';
 import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
+import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 
 @Controller('unidades')
 export class UnidadesController {
   constructor(private readonly unidadesService: UnidadesService) {}
 
-  @Post()
-  create(@Body() createUnidadeDto: CreateUnidadeDto) {
-    return this.unidadesService.create(createUnidadeDto);
+  @Post('criar')
+  criar(@Body() createUnidadeDto: CreateUnidadeDto) {
+    return this.unidadesService.criar(createUnidadeDto);
   }
 
-  @Get()
-  findAll() {
-    return this.unidadesService.findAll();
+  @Permissoes('ADM')
+  @Get('buscar-tudo')
+  buscarTudo(
+    @Query('pagina') pagina?: string,
+    @Query('limite') limite?: string,
+    @Query('status') status?: string,
+    @Query('busca') busca?: string,
+  ) {
+    return this.unidadesService.buscarTudo(+pagina, +limite, status, busca);
   }
 
-  @IsPublic()
-  @Get('teste')
-  testaConexao() {
-    return this.unidadesService.testaConexao();
+  @Get('buscar-por-id/:id')
+  buscarPorId(@Param('id') id: string) {
+    return this.unidadesService.buscarPorId(id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.unidadesService.findOne(+id);
+  @Patch('atualizar/:id')
+  atualizar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
+    return this.unidadesService.atualizar(id, updateUnidadeDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
-    return this.unidadesService.update(+id, updateUnidadeDto);
+  @Delete('desativar/:id')
+  desativar(@Param('id') id: string) {
+    return this.unidadesService.desativar(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.unidadesService.remove(+id);
-  }
+  // @IsPublic()
+  // @Get('teste')
+  // testaConexao() {
+  //   return this.unidadesService.testaConexao();
+  // }
 }
