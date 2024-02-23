@@ -12,11 +12,16 @@ export class UnidadesService {
     private app: AppService
   ) {}
 
+  async listaCompleta() {
+    const lista = await this.prisma.unidade.findMany();
+    if (!lista || lista.length == 0) throw new ForbiddenException('Nenhuma unidade encontrada');
+    return lista;
+  }
+
   async buscaPorCodigo(codigo: string) {
     const unidade = await this.prisma.unidade.findUnique({
       where: { codigo }
     });
-    console.log(unidade);
     return unidade;
   }
 

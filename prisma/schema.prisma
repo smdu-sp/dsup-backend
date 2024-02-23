@@ -50,7 +50,8 @@ model Unidade {
 
 model Ordem {
   id                String    @id @default(uuid())
-  local             String
+  andar             Int
+  sala              String
   solicitante       Usuario   @relation(fields: [solicitante_id], references: [id])
   solicitante_id    String
   data_solicitacao  DateTime  @default(now())

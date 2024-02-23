@@ -26,6 +26,19 @@ export class AuthService {
     return { access_token };
   }
 
+  refresh(usuario: Usuario): UsuarioToken {
+    const payload: UsuarioPayload = {
+      sub: usuario.id,
+      nome: usuario.nome,
+      login: usuario.login,
+      email: usuario.email,
+      permissao: usuario.permissao,
+      status: usuario.status,
+    };
+    const access_token = this.jwtService.sign(payload);
+    return { access_token };
+  }
+
   async validateUser(login: string, senha: string) {
     let usuario = await this.usuariosService.buscarPorLogin(login);
     if (usuario && usuario.status === 3)
@@ -43,7 +56,6 @@ export class AuthService {
     await new Promise<void>((resolve, reject) => {
       client.bind(`${login}${process.env.LDAP_DOMAIN}`, senha, (err) => {
         if (err) {
-          console.log(err);
           client.destroy();
           reject(new UnauthorizedException('Credenciais incorretas.'));
         }

@@ -26,6 +26,14 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('refresh') //localhost:3000/refresh
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthGuard)
+  @IsPublic()
+  refresh(@Request() req: AuthRequest) {
+    return this.authService.refresh(req.user);
+  }
+
   @Get('eu')
   usuarioAtual(@UsuarioAtual() usuario: Usuario) {
     return usuario;

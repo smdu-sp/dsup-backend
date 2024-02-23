@@ -26,6 +26,12 @@ export class UnidadesController {
     return this.unidadesService.buscarTudo(+pagina, +limite, status, busca);
   }
 
+  @Permissoes('ADM', 'TEC', 'USR')
+  @Get('lista-completa')
+  listaCompleta() {
+    return this.unidadesService.listaCompleta();
+  }
+
   @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
     return this.unidadesService.buscarPorId(id);
