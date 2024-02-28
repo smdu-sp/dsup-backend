@@ -6,6 +6,7 @@ import {
   UseGuards,
   Request,
   Get,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -13,6 +14,7 @@ import { AuthRequest } from './models/AuthRequest';
 import { IsPublic } from './decorators/is-public.decorator';
 import { UsuarioAtual } from './decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
+import { RefreshAuthGuard } from './guards/refresh.guard';
 
 @Controller()
 export class AuthController {
@@ -27,11 +29,10 @@ export class AuthController {
   }
 
   @Post('refresh') //localhost:3000/refresh
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthGuard)
   @IsPublic()
-  refresh(@Request() req: AuthRequest) {
-    return this.authService.refresh(req.user);
+  @UseGuards(RefreshAuthGuard)
+  refresh(@UsuarioAtual() usuario: Usuario) {
+    return this.authService.refresh(usuario);
   }
 
   @Get('eu')

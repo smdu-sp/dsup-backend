@@ -13,7 +13,8 @@ import { UsuariosService } from './usuarios.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
-import { Usuario } from '@prisma/client';
+import { Usuario, $Enums } from '@prisma/client';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('usuarios') //localhost:3000/usuarios
 export class UsuariosController {
@@ -35,8 +36,10 @@ export class UsuariosController {
     @Query('limite') limite?: string,
     @Query('status') status?: string,
     @Query('busca') busca?: string,
+    @Query('permissao') permissao?: string,
+    @Query('unidade_id') unidade_id?: string,
   ) {
-    return this.usuariosService.buscarTudo(+pagina, +limite, +status, busca);
+    return this.usuariosService.buscarTudo(+pagina, +limite, +status, busca, permissao, unidade_id);
   }
 
   @Permissoes('ADM')
@@ -45,7 +48,7 @@ export class UsuariosController {
     return this.usuariosService.buscarPorId(id);
   }
 
-  @Permissoes('ADM')
+  @Permissoes('ADM', 'TEC', 'USR')
   @Patch('atualizar/:id') //localhost:3000/usuarios/atualizar/id
   atualizar(
     @UsuarioAtual() usuario: Usuario,
@@ -53,6 +56,12 @@ export class UsuariosController {
     @Body() updateUsuarioDto: UpdateUsuarioDto,
   ) {
     return this.usuariosService.atualizar(usuario, id, updateUsuarioDto);
+  }
+
+  @Permissoes('ADM', 'TEC', 'USR')
+  @Get('lista-completa')
+  listaCompleta() {
+    return this.usuariosService.listaCompleta();
   }
 
   // @Permissoes('SUP')

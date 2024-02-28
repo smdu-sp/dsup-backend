@@ -1,8 +1,8 @@
+import { IsPublic } from './../auth/decorators/is-public.decorator';
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { UnidadesService } from './unidades.service';
 import { CreateUnidadeDto } from './dto/create-unidade.dto';
 import { UpdateUnidadeDto } from './dto/update-unidade.dto';
-import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 
 @Controller('unidades')
@@ -45,6 +45,12 @@ export class UnidadesController {
   @Delete('desativar/:id')
   desativar(@Param('id') id: string) {
     return this.unidadesService.desativar(id);
+  }
+
+  @Permissoes('DEV')
+  @Get('importar')
+  importar() {
+    return this.unidadesService.importar();
   }
 
   // @IsPublic()

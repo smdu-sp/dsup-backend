@@ -5,6 +5,7 @@ import { UsuarioPayload } from './models/UsuarioPayload';
 import { JwtService } from '@nestjs/jwt';
 import { UsuarioToken } from './models/UsuarioToken';
 import { Client, createClient } from 'ldapjs';
+import { UsuarioJwt } from './models/UsuarioJwt';
 
 @Injectable()
 export class AuthService {
@@ -13,39 +14,34 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  login(usuario: Usuario): UsuarioToken {
-    const payload: UsuarioPayload = {
-      sub: usuario.id,
-      nome: usuario.nome,
-      login: usuario.login,
-      email: usuario.email,
-      permissao: usuario.permissao,
-      status: usuario.status,
-    };
-    const access_token = this.jwtService.sign(payload);
-    return { access_token };
+  async login(usuario: Usuario): Promise<UsuarioToken> {
+    const { access_token, refresh_token } = await this.getTokens(usuario);
+    return { access_token, refresh_token };
   }
 
-  refresh(usuario: Usuario): UsuarioToken {
-    const payload: UsuarioPayload = {
-      sub: usuario.id,
-      nome: usuario.nome,
-      login: usuario.login,
-      email: usuario.email,
-      permissao: usuario.permissao,
-      status: usuario.status,
-    };
-    const access_token = this.jwtService.sign(payload);
-    return { access_token };
+  async refresh(usuario: Usuario) {
+    const { access_token, refresh_token } = await this.getTokens(usuario);
+    return { access_token, refresh_token };
+  }
+
+  async getTokens(usuario: UsuarioJwt) {
+    const { id, login, nome, email, permissao, status } = usuario;
+    const payload: UsuarioPayload = { sub: id, login, nome, email, permissao, status };
+    const access_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: process.env.JWT_SECRET,
+    });
+    const refresh_token = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d',
+      secret: process.env.RT_SECRET,
+    });
+    return { access_token, refresh_token };
   }
 
   async validateUser(login: string, senha: string) {
     let usuario = await this.usuariosService.buscarPorLogin(login);
-    if (usuario && usuario.status === 3)
-      throw new UnauthorizedException(
-        'Usuário aguardando aprovação de acesso ao sistema.',
-      );
-    if (usuario && usuario.status === 2)
+    if (!usuario) throw new UnauthorizedException('Usuário não encontrado.');
+    if (usuario && usuario.status !== 1)
       throw new UnauthorizedException('Usuário inativo.');
     if (process.env.ENVIRONMENT == 'local') {
       if (usuario) return usuario;
@@ -82,7 +78,7 @@ export class AuthService {
               ).replaceAll('"', '');
               const email = JSON.stringify(
                 entry.pojo.attributes[1].values[0],
-              ).replaceAll('"', '');
+              ).replaceAll('"', '').toLowerCase();
               const novoUsuario = await this.usuariosService.criar({
                 nome,
                 login,
