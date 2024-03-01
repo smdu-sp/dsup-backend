@@ -69,18 +69,19 @@ export class UsuariosService {
           permissaoCriador,
         );
     }
-    const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
-      where: {
-        cpRF: { startsWith: createUsuarioDto.login.substring(1) },
-      },
-    });
-    var unidade_id = '';
-    if (usuario_sgu){
-      const codigo = usuario_sgu.cpUnid;
-      const unidade = await this.prisma.unidade.findUnique({ where: { codigo } });
-      unidade_id = unidade ? unidade.id : '';
+    var unidade_id = createUsuarioDto.unidade_id;
+    if (!unidade_id){
+      const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
+        where: {
+          cpRF: { startsWith: createUsuarioDto.login.substring(1) },
+        },
+      });
+      if (usuario_sgu){
+        const codigo = usuario_sgu.cpUnid;
+        const unidade = await this.prisma.unidade.findUnique({ where: { codigo } });
+        unidade_id = unidade ? unidade.id : '';
+      }
     }
-
     const usuario = await this.prisma.usuario.create({
       data: { 
         ...createUsuarioDto,
@@ -203,6 +204,8 @@ export class UsuariosService {
   }
 
   async buscarNovo(login: string){
+    const usuarioExiste = await this.buscarPorLogin(login);
+    if (usuarioExiste) throw new ForbiddenException('Login já cadastrado.');
     const rf = login.substring(1);
     const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
       where: {
@@ -219,10 +222,10 @@ export class UsuariosService {
       url: process.env.LDAP_SERVER,
     });
     await new Promise<void>((resolve, reject) => {
-      client.bind(`${login}${process.env.LDAP_DOMAIN}`, '', (err) => {
+      client.bind(`${process.env.USER_LDAP}${process.env.LDAP_DOMAIN}`, process.env.PASS_LDAP, (err) => {
         if (err) {
           client.destroy();
-          reject(new UnauthorizedException('Credenciais incorretas.'));
+          reject(new UnauthorizedException('Credenciais incorretas 2.'));
         }
         resolve();
       });
@@ -238,7 +241,7 @@ export class UsuariosService {
         (err, res) => {
           if (err) {
             client.destroy();
-            reject();
+            resolve('erro');
           }
           res.on('searchEntry', async (entry) => {
             const nome = JSON.stringify(
@@ -249,16 +252,24 @@ export class UsuariosService {
             ).replaceAll('"', '').toLowerCase();
             resolve({ nome, email });
           });
+          res.on('error', (err) => {
+            client.destroy();
+            resolve('erro');
+          });
+          res.on('end', () => {
+            client.destroy();
+            resolve('erro');
+          });
         },
       );
     });
-    if (!usuario_ldap) throw new UnauthorizedException('Credenciais incorretas.');
+    client.destroy();
+    if (!usuario_ldap.email) throw new UnauthorizedException('Credenciais incorretas.');
     return {
       login,
       nome: usuario_ldap.nome,
       email: usuario_ldap.email,
       unidade_id
     };
-
   }
 }

@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  // Post,
+  Post,
   Body,
   Patch,
   Param,
@@ -9,25 +9,24 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
-// import { CreateUsuarioDto } from './dto/create-usuario.dto';
+import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
-import { Usuario, $Enums } from '@prisma/client';
-import { IsPublic } from 'src/auth/decorators/is-public.decorator';
+import { Usuario } from '@prisma/client';
 
 @Controller('usuarios') //localhost:3000/usuarios
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
-  // @Permissoes('SUP', 'ADM')
-  // @Post('criar') //localhost:3000/usuarios/criar
-  // criar(
-  //   @UsuarioAtual() usuario: Usuario,
-  //   @Body() createUsuarioDto: CreateUsuarioDto,
-  // ) {
-  //   return this.usuariosService.criar(createUsuarioDto, usuario);
-  // }
+  @Permissoes('SUP', 'ADM')
+  @Post('criar') //localhost:3000/usuarios/criar
+  criar(
+    @UsuarioAtual() usuario: Usuario,
+    @Body() createUsuarioDto: CreateUsuarioDto,
+  ) {
+    return this.usuariosService.criar(createUsuarioDto, usuario);
+  }
 
   @Permissoes('ADM')
   @Get('buscar-tudo') //localhost:3000/usuarios/buscar-tudo
@@ -79,5 +78,11 @@ export class UsuariosController {
   @Get('valida-usuario')
   validaUsuario(@UsuarioAtual() usuario: Usuario) {
     return this.usuariosService.validaUsuario(usuario.id);
+  }
+
+  @Permissoes('ADM')
+  @Get('buscar-novo')
+  buscarNovo(@Query('login') login: string) {
+    return this.usuariosService.buscarNovo(login);
   }
 }
