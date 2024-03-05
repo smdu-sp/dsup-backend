@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `ordens` ADD COLUMN `status` INTEGER NOT NULL DEFAULT 0;
