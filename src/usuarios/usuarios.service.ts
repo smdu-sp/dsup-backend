@@ -40,7 +40,6 @@ export class UsuariosService {
     permissao: $Enums.Permissao,
     permissaoCriador: $Enums.Permissao,
   ) {
-    console.log({ permissao, permissaoCriador });
     if (
       permissao === $Enums.Permissao.DEV &&
       permissaoCriador === $Enums.Permissao.ADM

@@ -12,12 +12,27 @@ export class OrdensService {
     private app: AppService
   ) {}
 
+  async geraId() {
+    let id = "";
+    let numerico = 1;
+    const agora = new Date();
+    const data = `${agora.getFullYear()}${(agora.getMonth() + 1).toString().padStart(2, '0')}${agora.getDate().toString().padStart(2, '0')}`;
+    const ultimoCadastrado = await this.prisma.ordem.findFirst({
+      where: { id: { startsWith: data } },
+    });
+    if (ultimoCadastrado)
+      numerico = parseInt(ultimoCadastrado.id.substring(8)) + 1;
+    id = `${data}${numerico.toString().padStart(4, '0')}`;
+    return id;
+  }
+
   async criar(createOrdemDto: CreateOrdemDto, solicitante: Usuario) {
+    const id = await this.geraId();
     const { unidade_id, andar, sala, tipo, observacoes } = createOrdemDto;
     const unidade = await this.prisma.unidade.findUnique({ where: { id: unidade_id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada');
     const novaOrdem = await this.prisma.ordem.create({
-      data: { unidade_id, solicitante_id: solicitante.id, andar, sala, tipo, observacoes }
+      data: { id, unidade_id, solicitante_id: solicitante.id, andar, sala, tipo, observacoes }
     });
     if (!novaOrdem) throw new InternalServerErrorException('Não foi possível criar o chamado. Tente novamente');
     return novaOrdem;
@@ -33,7 +48,6 @@ export class OrdensService {
     sala?: string,
     tipo?: number
   ) {
-    console.log({ pagina, limite, status, unidade_id, solicitante_id, andar, sala, tipo });
     [pagina, limite] = this.app.verificaPagina(pagina, limite);
     const searchParams = {
       ...(status !== 0 && { status }),

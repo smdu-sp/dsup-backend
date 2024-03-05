@@ -51,7 +51,7 @@ model Unidade {
 }
 
 model Ordem {
-  id                String    @id @default(uuid())
+  id                String    @id
   unidade_id        String
   unidade           Unidade   @relation(fields: [unidade_id], references: [id])
   andar             Int
