@@ -33,10 +33,10 @@ export class OrdensController {
     return this.ordensService.buscarPorId(id);
   }
 
-  // @Patch('atualizar/:id')
-  // atualizar(@Param('id') id: string, @Body() updateOrdemDto: UpdateOrdemDto) {
-  //   return this.ordensService.atualizar(id, updateOrdemDto);
-  // }
+  @Patch('atualizar/:id')
+  atualizar(@Param('id') id: string, @Body() updateOrdemDto: UpdateOrdemDto) {
+    return this.ordensService.atualizar(id, updateOrdemDto);
+  }
 
   // @Delete('desativar/:id')
   // desativar(@Param('id') id: string) {

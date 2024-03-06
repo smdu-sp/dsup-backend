@@ -19,11 +19,25 @@ export class OrdensService {
     const data = `${agora.getFullYear()}${(agora.getMonth() + 1).toString().padStart(2, '0')}${agora.getDate().toString().padStart(2, '0')}`;
     const ultimoCadastrado = await this.prisma.ordem.findFirst({
       where: { id: { startsWith: data } },
+      orderBy: { data_solicitacao: 'desc' }
     });
     if (ultimoCadastrado)
       numerico = parseInt(ultimoCadastrado.id.substring(8)) + 1;
     id = `${data}${numerico.toString().padStart(4, '0')}`;
     return id;
+  }
+
+  async atualizar(id: string, updateOrdemDto: UpdateOrdemDto) {
+    const ordem = await this.prisma.ordem.findUnique({ where: { id } });
+    if (!ordem) throw new ForbiddenException('Ordem não encontrada');
+    const updatedOrdem = await this.prisma.ordem.update({
+      where: { id },
+      data: {
+        prioridade: updateOrdemDto.prioridade
+      }
+    });
+    if (!updatedOrdem) throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente');
+    return updatedOrdem;
   }
 
   async criar(createOrdemDto: CreateOrdemDto, solicitante: Usuario) {

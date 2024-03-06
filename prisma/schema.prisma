@@ -61,7 +61,7 @@ model Ordem {
   data_solicitacao  DateTime  @default(now())
   tipo              Int       @default(0)
   status            Int       @default(1)
-  prioridade        Int       @default(0)
+  prioridade        Int       @default(1)
   observacoes       String
   servicos          Servico[]
 
