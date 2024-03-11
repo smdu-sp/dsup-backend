@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Global,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -12,6 +13,7 @@ import { AppService } from 'src/app.service';
 import { Prisma2Service } from 'src/prisma2/prisma2.service';
 import { Client, createClient } from 'ldapjs';
 
+@Global()
 @Injectable()
 export class UsuariosService {
   constructor(

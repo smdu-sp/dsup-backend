@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `servicos` MODIFY `data_inicio` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

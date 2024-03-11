@@ -1,10 +1,11 @@
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ForbiddenException, Global, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateOrdemDto } from './dto/create-ordem.dto';
 import { UpdateOrdemDto } from './dto/update-ordem.dto';
 import { AppService } from 'src/app.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Usuario } from '@prisma/client';
 
+@Global()
 @Injectable()
 export class OrdensService {
   constructor(
@@ -25,6 +26,15 @@ export class OrdensService {
       numerico = parseInt(ultimoCadastrado.id.substring(8)) + 1;
     id = `${data}${numerico.toString().padStart(4, '0')}`;
     return id;
+  }
+
+  async retornaPainel(usuario: Usuario) {
+    const abertos = usuario.permissao === 'USR' ? 
+      await this.prisma.ordem.count({ where: { AND: [{ OR: [{ status: 2 }, {status: 1}] }, { solicitante_id: usuario.id } ]}}) :
+      await this.prisma.ordem.count({ where: { status: 2 } });
+    const naoAtribuidos = await this.prisma.ordem.count({ where: { status: 1 } });
+    const concluidos = await this.prisma.ordem.count({ where: { status: 4 } });
+    return { abertos, naoAtribuidos, concluidos };
   }
 
   async atualizar(id: string, updateOrdemDto: UpdateOrdemDto) {
@@ -93,13 +103,21 @@ export class OrdensService {
   }
 
   async buscarPorId(id: string) {
-    const ordem = await this.prisma.ordem.findUnique({ where: { id } });
+    const ordem = await this.prisma.ordem.findUnique({ 
+      where: { id },
+      include: {
+        servicos: {
+          include: {
+            suspensoes: true,
+            servicos_materiais: true,
+            tecnico: true
+          }
+        },
+      }
+    });
     if (!ordem) throw new ForbiddenException('Ordem não encontrada');
     return ordem;
   }
-
-  // async atualizar(id: string, updateOrdemDto: UpdateOrdemDto) {
-  // }
 
   // async desativar(id: string) {
   // }

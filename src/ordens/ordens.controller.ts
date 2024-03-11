@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Global } from '@nestjs/common';
 import { OrdensService } from './ordens.service';
 import { CreateOrdemDto } from './dto/create-ordem.dto';
 import { UpdateOrdemDto } from './dto/update-ordem.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
 
+@Global()
 @Controller('ordens')
 export class OrdensController {
   constructor(private readonly ordensService: OrdensService) {}
@@ -36,6 +37,11 @@ export class OrdensController {
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateOrdemDto: UpdateOrdemDto) {
     return this.ordensService.atualizar(id, updateOrdemDto);
+  }
+
+  @Get('painel')
+  retornaPainel(@UsuarioAtual() usuario: Usuario) {
+    return this.ordensService.retornaPainel(usuario);
   }
 
   // @Delete('desativar/:id')

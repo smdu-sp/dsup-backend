@@ -72,13 +72,26 @@ model Servico {
   id                  String              @id @default(uuid())
   tecnico             Usuario             @relation(fields: [tecnico_id], references: [id])
   tecnico_id          String
-  data_inicio         DateTime
-  status              Int                 @default(0)
+  data_inicio         DateTime            @default(now())
   servicos_materiais  Servico_Material[]
+  suspensoes          Suspensao[]
   ordem               Ordem               @relation(fields: [ordem_id], references: [id])
   ordem_id            String
+  concluido_em        DateTime?
+  status              Int                 @default(1)
+  observacao          String?
 
   @@map("servicos")
+}
+
+model Suspensao {
+  id                  String              @id @default(uuid())
+  servico_id          String
+  servico             Servico             @relation(fields: [servico_id], references: [id])
+  motivo              String
+  status              Boolean             @default(true)
+
+  @@map("suspensoes")
 }
 
 model Material {

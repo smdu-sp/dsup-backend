@@ -33,10 +33,14 @@ CREATE TABLE `unidades` (
 -- CreateTable
 CREATE TABLE `ordens` (
     `id` VARCHAR(191) NOT NULL,
-    `local` VARCHAR(191) NOT NULL,
+    `unidade_id` VARCHAR(191) NOT NULL,
+    `andar` INTEGER NOT NULL,
+    `sala` VARCHAR(191) NOT NULL,
     `solicitante_id` VARCHAR(191) NOT NULL,
     `data_solicitacao` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `tipo` INTEGER NOT NULL DEFAULT 0,
+    `status` INTEGER NOT NULL DEFAULT 1,
+    `prioridade` INTEGER NOT NULL DEFAULT 1,
     `observacoes` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -47,8 +51,20 @@ CREATE TABLE `servicos` (
     `id` VARCHAR(191) NOT NULL,
     `tecnico_id` VARCHAR(191) NOT NULL,
     `data_inicio` DATETIME(3) NOT NULL,
-    `status` INTEGER NOT NULL DEFAULT 0,
     `ordem_id` VARCHAR(191) NOT NULL,
+    `concluido_em` DATETIME(3) NULL,
+    `status` INTEGER NOT NULL DEFAULT 1,
+    `observacao` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `suspensoes` (
+    `id` VARCHAR(191) NOT NULL,
+    `servico_id` VARCHAR(191) NOT NULL,
+    `motivo` VARCHAR(191) NOT NULL,
+    `status` BOOLEAN NOT NULL DEFAULT true,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -76,6 +92,9 @@ CREATE TABLE `servicos_materiais` (
 ALTER TABLE `usuarios` ADD CONSTRAINT `usuarios_unidade_id_fkey` FOREIGN KEY (`unidade_id`) REFERENCES `unidades`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `ordens` ADD CONSTRAINT `ordens_unidade_id_fkey` FOREIGN KEY (`unidade_id`) REFERENCES `unidades`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `ordens` ADD CONSTRAINT `ordens_solicitante_id_fkey` FOREIGN KEY (`solicitante_id`) REFERENCES `usuarios`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -83,6 +102,9 @@ ALTER TABLE `servicos` ADD CONSTRAINT `servicos_tecnico_id_fkey` FOREIGN KEY (`t
 
 -- AddForeignKey
 ALTER TABLE `servicos` ADD CONSTRAINT `servicos_ordem_id_fkey` FOREIGN KEY (`ordem_id`) REFERENCES `ordens`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `suspensoes` ADD CONSTRAINT `suspensoes_servico_id_fkey` FOREIGN KEY (`servico_id`) REFERENCES `servicos`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `servicos_materiais` ADD CONSTRAINT `servicos_materiais_servico_id_fkey` FOREIGN KEY (`servico_id`) REFERENCES `servicos`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

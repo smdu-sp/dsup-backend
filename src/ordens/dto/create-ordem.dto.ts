@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString, MaxLength } from "class-validator";
 
 export class CreateOrdemDto {
     @IsString({ message: 'Unidade inválida!' })

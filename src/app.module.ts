@@ -10,10 +10,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UnidadesModule } from './unidades/unidades.module';
 import { OrdensModule } from './ordens/ordens.module';
 import { Prisma2Module } from './prisma2/prisma2.module';
+import { ServicosModule } from './servicos/servicos.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, UnidadesModule, OrdensModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, UnidadesModule, OrdensModule, ServicosModule],
   exports: [AppService],
   controllers: [AppController],
   providers: [
