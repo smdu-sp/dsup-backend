@@ -28,10 +28,10 @@ export class ServicosService {
       data: avaliarServicoDto
     });
     if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
-    const ordemAtualizada = await this.prisma.ordem.update({
+    await this.prisma.ordem.update({
       where: { id: ordem.id },
       data: {
-        status: 4
+        status: avaliarServicoDto.status === 3 ? 4 : 1
       }
     });
     return avaliado;
