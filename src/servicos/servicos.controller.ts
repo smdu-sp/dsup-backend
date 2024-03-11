@@ -4,6 +4,7 @@ import { CreateServicoDto } from './dto/create-servico.dto';
 import { UpdateServicoDto } from './dto/update-servico.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
+import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
 
 @Controller('servicos')
 export class ServicosController {
@@ -27,6 +28,20 @@ export class ServicosController {
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateServicoDto: UpdateServicoDto) {
     return this.servicosService.atualizar(id, updateServicoDto);
+  }
+
+  @Get('finalizar-servico/:id')
+  finalizarServico(@Param('id') id: string, @UsuarioAtual() usuario: Usuario) {
+    return this.servicosService.finalizarServico(id, usuario);
+  }
+
+  @Patch('avaliar-servico/:id')
+  avaliarServico(
+    @Param('id') id: string,
+    @Body() avaliarServicoDto: AvaliarServicoDto,
+    @UsuarioAtual() usuario: Usuario
+  ) {
+    return this.servicosService.avaliarServico(id, avaliarServicoDto, usuario);
   }
 
   // @Delete(':id')

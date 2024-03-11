@@ -17,6 +17,7 @@ export class OrdensController {
 
   @Get('buscar-tudo')
   buscarTudo(
+    @UsuarioAtual() usuario: Usuario,
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string,
     @Query('status') status?: string,
@@ -26,7 +27,7 @@ export class OrdensController {
     @Query('sala') sala?: string,
     @Query('tipo') tipo?: string,
   ) {
-    return this.ordensService.buscarTudo(+pagina, +limite, +status, unidade_id, solicitante_id, +andar, sala, +tipo);
+    return this.ordensService.buscarTudo(usuario, +pagina, +limite, +status, unidade_id, solicitante_id, +andar, sala, +tipo);
   }
 
   @Get('buscar-por-id/:id')

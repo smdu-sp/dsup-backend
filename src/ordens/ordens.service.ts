@@ -63,6 +63,7 @@ export class OrdensService {
   }
 
   async buscarTudo(
+    usuario: Usuario,
     pagina: number = 1,
     limite: number = 10,
     status: number = 0,
@@ -80,6 +81,7 @@ export class OrdensService {
       ...(sala !== '' && { sala }),
       ...(andar !== 0 && { sala }),
       ...(tipo !== 0 && { tipo }),
+      ...(usuario.permissao === 'USR' && { solicitante_id: usuario.id }),
     };
     const total = await this.prisma.ordem.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
@@ -111,7 +113,8 @@ export class OrdensService {
             suspensoes: true,
             servicos_materiais: true,
             tecnico: true
-          }
+          },
+          orderBy: { data_inicio: 'desc' }
         },
       }
     });

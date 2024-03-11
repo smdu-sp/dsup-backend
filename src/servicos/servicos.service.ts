@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from 'src/app.service';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { OrdensService } from 'src/ordens/ordens.service';
+import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
 
 @Injectable()
 export class ServicosService {
@@ -15,6 +16,27 @@ export class ServicosService {
     private usuarios: UsuariosService,
     private ordens: OrdensService,
   ) {}
+
+  async avaliarServico(id: string, avaliarServicoDto: AvaliarServicoDto, usuario: Usuario) {
+    const servico = await this.prisma.servico.findUnique({ where: { id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id } });
+    if (!ordem) throw new ForbiddenException('Ordem não encontrada.');
+    if (ordem.solicitante_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const avaliado = await this.prisma.servico.update({
+      where: { id },
+      data: avaliarServicoDto
+    });
+    if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
+    const ordemAtualizada = await this.prisma.ordem.update({
+      where: { id: ordem.id },
+      data: {
+        status: 4
+      }
+    });
+    return avaliado;
+  }
+
   async criar(createServicoDto: any, usuario: Usuario) {
     if (createServicoDto.tecnico_id || createServicoDto.tecnico_id === '') {
       const tecnico = await this.usuarios.buscarPorId(createServicoDto.tecnico_id);
@@ -54,5 +76,26 @@ export class ServicosService {
   }
 
   async atualizar(id: string, updateServicoDto: UpdateServicoDto) {
+  }
+
+  async finalizarServico(id: string, usuario: Usuario) {
+    console.log(id);
+    const servico = await this.prisma.servico.findUnique({ where: { id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    if (servico.tecnico_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const finalizado = await this.prisma.servico.update({
+      where: { id },
+      data: { status: 2 }
+    });
+    if (!finalizado) throw new InternalServerErrorException('Não foi possível finalizar o chamado. Tente novamente.');
+    const ordem = await this.prisma.ordem.update({
+      where: { id: servico.ordem_id },
+      data: { status: 3 }
+    })
+    if (!ordem) {
+      await this.prisma.servico.update({ where: { id }, data: { status: 1 } });
+      throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente.');
+    }
+    return finalizado;
   }
 }
