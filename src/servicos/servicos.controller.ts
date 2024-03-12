@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Request } from '@nestjs/common';
 import { ServicosService } from './servicos.service';
 import { CreateServicoDto } from './dto/create-servico.dto';
 import { UpdateServicoDto } from './dto/update-servico.dto';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
 import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
+import { Request as Req } from 'express';
 
 @Controller('servicos')
 export class ServicosController {
@@ -37,11 +38,10 @@ export class ServicosController {
 
   @Patch('avaliar-servico/:id')
   avaliarServico(
-    @Param('id') id: string,
-    @Body() avaliarServicoDto: AvaliarServicoDto,
-    @UsuarioAtual() usuario: Usuario
+    @Request() req: Req,
   ) {
-    return this.servicosService.avaliarServico(id, avaliarServicoDto, usuario);
+    console.log(req.body);
+    // return this.servicosService.avaliarServico(avaliarServicoDto);
   }
 
   // @Delete(':id')
