@@ -17,25 +17,24 @@ export class ServicosService {
     private ordens: OrdensService,
   ) {}
 
-  async avaliarServico(avaliarServicoDto: any) {
-    console.log(avaliarServicoDto);
-    // const servico = await this.prisma.servico.findUnique({ where: { id } });
-    // if (!servico) throw new ForbiddenException('Serviço não encontrado.');
-    // const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id } });
-    // if (!ordem) throw new ForbiddenException('Ordem não encontrada.');
-    // if (ordem.solicitante_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
-    // const avaliado = await this.prisma.servico.update({
-    //   where: { id },
-    //   data: avaliarServicoDto
-    // });
-    // if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
-    // await this.prisma.ordem.update({
-    //   where: { id: ordem.id },
-    //   data: {
-    //     status: avaliarServicoDto.status === 3 ? 4 : 1
-    //   }
-    // });
-    // return avaliado;
+  async avaliarServico(id: string, avaliarServicoDto: AvaliarServicoDto, usuario: Usuario) {
+    const servico = await this.prisma.servico.findUnique({ where: { id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id } });
+    if (!ordem) throw new ForbiddenException('Ordem não encontrada.');
+    if (ordem.solicitante_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const avaliado = await this.prisma.servico.update({
+      where: { id },
+      data: avaliarServicoDto
+    });
+    if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
+    await this.prisma.ordem.update({
+      where: { id: ordem.id },
+      data: {
+        status: avaliarServicoDto.status === 3 ? 4 : 1
+      }
+    });
+    return avaliado;
   }
 
   async criar(createServicoDto: any, usuario: Usuario) {
@@ -80,7 +79,6 @@ export class ServicosService {
   }
 
   async finalizarServico(id: string, usuario: Usuario) {
-    console.log(id);
     const servico = await this.prisma.servico.findUnique({ where: { id } });
     if (!servico) throw new ForbiddenException('Serviço não encontrado.');
     if (servico.tecnico_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');

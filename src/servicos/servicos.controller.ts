@@ -38,10 +38,11 @@ export class ServicosController {
 
   @Patch('avaliar-servico/:id')
   avaliarServico(
-    @Request() req: Req,
+    @Param('id') id: string,
+    @Body() avaliarServicoDto: AvaliarServicoDto,
+    @UsuarioAtual() usuario: Usuario,
   ) {
-    console.log(req.body);
-    // return this.servicosService.avaliarServico(avaliarServicoDto);
+    return this.servicosService.avaliarServico(id, avaliarServicoDto, usuario);
   }
 
   // @Delete(':id')
