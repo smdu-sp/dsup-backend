@@ -25,13 +25,16 @@ export class ServicosService {
     if (ordem.solicitante_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
     const avaliado = await this.prisma.servico.update({
       where: { id },
-      data: avaliarServicoDto
+      data: {
+        ...avaliarServicoDto,
+        concluido_em: new Date()
+      }
     });
     if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
     await this.prisma.ordem.update({
       where: { id: ordem.id },
       data: {
-        status: avaliarServicoDto.status === 3 ? 4 : 1
+        status: avaliarServicoDto.status === 3 ? 4 : 1,
       }
     });
     return avaliado;
