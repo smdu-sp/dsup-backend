@@ -108,18 +108,21 @@ export class OrdensService {
     const ordem = await this.prisma.ordem.findUnique({ 
       where: { id },
       include: {
+        solicitante: true,
+        unidade: true,
         servicos: {
           include: {
             suspensoes: true,
-            servicos_materiais: true,
+            materiais: true,
             tecnico: true
           },
           orderBy: { data_inicio: 'desc' }
         },
       }
     });
+    const suspensaoAtiva = await this.prisma.servico.findFirst({ where: { ordem_id: id, status: 5 } });
     if (!ordem) throw new ForbiddenException('Ordem não encontrada');
-    return ordem;
+    return { ...ordem, suspensaoAtiva: suspensaoAtiva ? true : false };
   }
 
   // async desativar(id: string) {

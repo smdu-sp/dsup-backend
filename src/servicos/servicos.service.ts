@@ -7,6 +7,7 @@ import { AppService } from 'src/app.service';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { OrdensService } from 'src/ordens/ordens.service';
 import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
+import { AdicionarSuspensaoDto } from './dto/adicionar-suspensao-dto';
 
 @Injectable()
 export class ServicosService {
@@ -27,7 +28,7 @@ export class ServicosService {
       where: { id },
       data: {
         ...avaliarServicoDto,
-        concluido_em: new Date()
+        avaliado_em: new Date()
       }
     });
     if (!avaliado) throw new InternalServerErrorException('Não foi possível avaliar o chamado. Tente novamente.');
@@ -40,25 +41,32 @@ export class ServicosService {
     return avaliado;
   }
 
-  async criar(createServicoDto: any, usuario: Usuario) {
-    if (createServicoDto.tecnico_id || createServicoDto.tecnico_id === '') {
+  async criar(createServicoDto: CreateServicoDto, usuario: Usuario) {
+    console.log(createServicoDto);
+    var tecnico_id = usuario.id;
+    var ordem_id = createServicoDto.ordem_id;
+    if (createServicoDto.tecnico_id) {
       const tecnico = await this.usuarios.buscarPorId(createServicoDto.tecnico_id);
       if (!tecnico) throw new ForbiddenException('Técnico não encontrado.');
       if (tecnico.permissao !== 'TEC') throw new ForbiddenException('Operação não autorizada para este usuário.');
-      createServicoDto.tecnico_id = tecnico.id;
-    } else {
+      tecnico_id = tecnico.id;
+    }
+    if (!createServicoDto.tecnico_id || createServicoDto.tecnico_id === ''){
       const tecnico = await this.usuarios.buscarPorId(usuario.id);
       if (!tecnico) throw new ForbiddenException('Técnico não encontrado.');
       if (tecnico.permissao !== 'TEC') throw new ForbiddenException('Operação não autorizada para este usuário.');
-      createServicoDto.tecnico_id = tecnico.id;
+      tecnico_id = tecnico.id;
     }
-    if (!createServicoDto.tecnico_id) throw new ForbiddenException('Técnico não informado.');
-    if (!createServicoDto.ordem_id || createServicoDto.ordem_id === '') throw new ForbiddenException('Ordem de Serviço não informada.');
+    if (!tecnico_id) throw new ForbiddenException('Técnico não informado.');
+    if (!ordem_id || ordem_id === '') throw new ForbiddenException('Ordem de Serviço não informada.');
     const ordem = await this.ordens.buscarPorId(createServicoDto.ordem_id);
     if (!ordem) throw new ForbiddenException('Ordem de Serviço não encontrada.');
-    createServicoDto.ordem_id = ordem.id;
+    console.log({ tecnico_id, ordem_id });
     const novoServico = await this.prisma.servico.create({
-      data: createServicoDto
+      data: {
+        tecnico_id,
+        ordem_id
+      }
     });
     if (!novoServico) throw new InternalServerErrorException('Não foi possível criar o chamado. Tente novamente.');
     const atualizaOrdemStatus = await this.prisma.ordem.update({
@@ -79,15 +87,29 @@ export class ServicosService {
   }
 
   async atualizar(id: string, updateServicoDto: UpdateServicoDto) {
+    const { descricao } = updateServicoDto;
+    const servico = await this.prisma.servico.findUnique({ where: { id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    const atualizado = await this.prisma.servico.update({
+      where: { id },
+      data: { descricao }
+    });
+    if (!atualizado) throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente.');
+    return atualizado;
   }
 
   async finalizarServico(id: string, usuario: Usuario) {
     const servico = await this.prisma.servico.findUnique({ where: { id } });
     if (!servico) throw new ForbiddenException('Serviço não encontrado.');
     if (servico.tecnico_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const suspensaoAtiva = await this.prisma.suspensao.findFirst({ where: { servico_id: servico.id, status: true } });
+    if (suspensaoAtiva) throw new ForbiddenException('Serviço possui suspensão ativa.');
     const finalizado = await this.prisma.servico.update({
       where: { id },
-      data: { status: 2 }
+      data: { 
+        status: 2,
+        data_fim: new Date()
+      }
     });
     if (!finalizado) throw new InternalServerErrorException('Não foi possível finalizar o chamado. Tente novamente.');
     const ordem = await this.prisma.ordem.update({
@@ -99,5 +121,49 @@ export class ServicosService {
       throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente.');
     }
     return finalizado;
+  }
+
+  async adicionarSuspensao(id: string, { motivo }: AdicionarSuspensaoDto, usuario: Usuario) {
+    const servico = await this.prisma.servico.findUnique({ where: { id, tecnico_id: usuario.id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    const suspensaoAtiva = await this.prisma.suspensao.findFirst({ where: { servico_id: id, status: true } });
+    if (suspensaoAtiva) throw new ForbiddenException('Serviço possui suspensão ativa.');
+    const suspensao = await this.prisma.suspensao.create({
+      data: {
+        servico_id: id,
+        motivo
+      }
+    });
+    if (!suspensao) throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
+    const atualizaServico = await this.prisma.servico.update({
+      where: { id },
+      data: { status: 5 }
+    })
+    if (!atualizaServico) {
+      await this.prisma.suspensao.delete({ where: { id: suspensao.id } });
+      throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
+    }
+    return suspensao;
+  }
+
+  async retomarServico(id: string, usuario: Usuario) {
+    const servico = await this.prisma.servico.findUnique({ where: { id, tecnico_id: usuario.id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    const suspensaoAtiva = await this.prisma.suspensao.findFirst({ where: { servico_id: id, status: true } });
+    if (!suspensaoAtiva) throw new ForbiddenException('Serviço não possui suspensão ativa.');
+    const suspensao = await this.prisma.suspensao.update({
+      where: { id: suspensaoAtiva.id },
+      data: { status: false, termino: new Date() }
+    });
+    if (!suspensao) throw new InternalServerErrorException('Não foi possível retomar o chamado. Tente novamente.');
+    const atualizaServico = await this.prisma.servico.update({
+      where: { id },
+      data: { status: 1 }
+    })
+    if (!atualizaServico) {
+      await this.prisma.suspensao.update({ where: { id: suspensao.id }, data: { status: true, termino: null } });
+      throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
+    }
+    return suspensao;
   }
 }

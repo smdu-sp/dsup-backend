@@ -73,11 +73,13 @@ model Servico {
   tecnico             Usuario             @relation(fields: [tecnico_id], references: [id])
   tecnico_id          String
   data_inicio         DateTime            @default(now())
-  servicos_materiais  Servico_Material[]
+  data_fim            DateTime?
+  descricao           String?
+  materiais           Material[]
   suspensoes          Suspensao[]
   ordem               Ordem               @relation(fields: [ordem_id], references: [id])
   ordem_id            String
-  concluido_em        DateTime?
+  avaliado_em         DateTime?
   status              Int                 @default(1)
   observacao          String?
 
@@ -89,27 +91,28 @@ model Suspensao {
   servico_id          String
   servico             Servico             @relation(fields: [servico_id], references: [id])
   motivo              String
+  inicio              DateTime            @default(now())
+  termino             DateTime?
   status              Boolean             @default(true)
 
   @@map("suspensoes")
 }
 
-model Material {
+model SugestaoMaterial {
   id                  String              @id @default(uuid())
   nome                String              @unique
-  servicos_materiais  Servico_Material[]
 
-  @@map("materiais")
+  @@map("sugestao_materiais")
 }
 
-model Servico_Material {
-  servico     Servico   @relation(fields: [servico_id], references: [id])
-  servico_id  String
-  material    Material  @relation(fields: [material_id], references: [id])
-  material_id String
+model Material {
+  id          String @id @default(uuid())
+  nome        String
   quantidade  Int
   medida      String
 
-  @@unique([servico_id, material_id])
-  @@map("servicos_materiais")
+  servico_id  String
+  servico     Servico @relation(fields: [servico_id], references: [id])
+
+  @@map("materiais")
 }

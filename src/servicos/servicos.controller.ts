@@ -6,6 +6,7 @@ import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
 import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
 import { Request as Req } from 'express';
+import { AdicionarSuspensaoDto } from './dto/adicionar-suspensao-dto';
 
 @Controller('servicos')
 export class ServicosController {
@@ -43,6 +44,23 @@ export class ServicosController {
     @UsuarioAtual() usuario: Usuario,
   ) {
     return this.servicosService.avaliarServico(id, avaliarServicoDto, usuario);
+  }
+
+  @Patch('adicionar-suspensao/:id')
+  adicionarSuspensao(
+    @Param('id') id: string,
+    @Body() adicionarSuspensaoDto: AdicionarSuspensaoDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
+    return this.servicosService.adicionarSuspensao(id, adicionarSuspensaoDto, usuario);
+  }
+
+  @Get('retomar-servico/:id')
+  retomarServico(
+    @Param('id') id: string,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
+    return this.servicosService.retomarServico(id, usuario);
   }
 
   // @Delete(':id')
