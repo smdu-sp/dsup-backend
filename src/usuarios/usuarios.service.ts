@@ -178,15 +178,15 @@ export class UsuariosService {
     return usuarioAtualizado;
   }
 
-  // async excluir(id: string) {
-  //   await this.prisma.usuario.update({
-  //     data: { status: 2 },
-  //     where: { id },
-  //   });
-  //   return {
-  //     mensagem: 'Usuário removido com sucesso!',
-  //   };
-  // }
+  async excluir(id: string) {
+    await this.prisma.usuario.update({
+      data: { status: 2 },
+      where: { id },
+    });
+    return {
+      desativado: true,
+    };
+  }
 
   async autorizaUsuario(id: string) {
     const autorizado = await this.prisma.usuario.update({

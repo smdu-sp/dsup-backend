@@ -17,14 +17,14 @@ export class OrdensService {
     let id = "";
     let numerico = 1;
     const agora = new Date();
-    const data = `${agora.getFullYear()}${(agora.getMonth() + 1).toString().padStart(2, '0')}${agora.getDate().toString().padStart(2, '0')}`;
+    const data = agora.getFullYear().toString().substring(2);
     const ultimoCadastrado = await this.prisma.ordem.findFirst({
-      where: { id: { startsWith: data } },
+      where: { id: { endsWith: data } },
       orderBy: { data_solicitacao: 'desc' }
     });
     if (ultimoCadastrado)
-      numerico = parseInt(ultimoCadastrado.id.substring(8)) + 1;
-    id = `${data}${numerico.toString().padStart(4, '0')}`;
+      numerico = parseInt(ultimoCadastrado.id.substring(0, 4)) + 1;
+    id = `${numerico.toString().padStart(4, '0')}-${data}`;
     return id;
   }
 

@@ -72,7 +72,7 @@ export class ServicosService {
     if (!novoServico) throw new InternalServerErrorException('Não foi possível criar o chamado. Tente novamente.');
     const atualizaOrdemStatus = await this.prisma.ordem.update({
       where: { id: ordem.id },
-      data: { status: 2 }
+      data: { status: 2, prioridade: createServicoDto.prioridade }
     })
     if (!atualizaOrdemStatus) {
       await this.prisma.servico.delete({ where: { id: novoServico.id } });

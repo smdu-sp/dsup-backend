@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Param,
-  // Delete,
+  Delete,
   Query,
 } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
@@ -63,11 +63,11 @@ export class UsuariosController {
     return this.usuariosService.listaCompleta();
   }
 
-  // @Permissoes('SUP')
-  // @Delete('excluir/:id') //localhost:3000/usuarios/excluir/id
-  // excluir(@Param('id') id: string) {
-  //   return this.usuariosService.excluir(id);
-  // }
+  @Permissoes('SUP')
+  @Delete('desativar/:id') //localhost:3000/usuarios/excluir/id
+  excluir(@Param('id') id: string) {
+    return this.usuariosService.excluir(id);
+  }
 
   @Permissoes('ADM')
   @Patch('autorizar/:id')
