@@ -8,6 +8,7 @@ import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { OrdensService } from 'src/ordens/ordens.service';
 import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
 import { AdicionarSuspensaoDto } from './dto/adicionar-suspensao-dto';
+import { AdicionarMaterialDto } from './dto/adicionar-material-dto';
 
 @Injectable()
 export class ServicosService {
@@ -165,5 +166,19 @@ export class ServicosService {
       throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
     }
     return suspensao;
+  }
+
+  async adicionarMaterial(servico_id: string, adicionarMaterialDto: AdicionarMaterialDto, usuario: Usuario) {
+    const servico = await this.prisma.servico.findUnique({ where: { id: servico_id } });
+    if (!servico) throw new ForbiddenException('Serviço não encontrado.');
+    if (servico.tecnico_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const material = await this.prisma.material.create({
+      data: {
+        ...adicionarMaterialDto,
+        servico_id
+      }
+    });
+    if (!material) throw new InternalServerErrorException('Não foi possível adicionar o material. Tente novamente.');
+    return material;
   }
 }

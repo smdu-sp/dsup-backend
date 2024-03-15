@@ -7,6 +7,7 @@ import { Usuario } from '@prisma/client';
 import { AvaliarServicoDto } from './dto/avaliar-servico-dto';
 import { Request as Req } from 'express';
 import { AdicionarSuspensaoDto } from './dto/adicionar-suspensao-dto';
+import { AdicionarMaterialDto } from './dto/adicionar-material-dto';
 
 @Controller('servicos')
 export class ServicosController {
@@ -61,6 +62,15 @@ export class ServicosController {
     @UsuarioAtual() usuario: Usuario,
   ) {
     return this.servicosService.retomarServico(id, usuario);
+  }
+
+  @Post('adicionar-material/:id')
+  adicionarMaterial(
+    @Param('id') id: string,
+    @Body() adicionarMaterialDto: AdicionarMaterialDto,
+    @UsuarioAtual() usuario: Usuario,
+  ) {
+    return this.servicosService.adicionarMaterial(id, adicionarMaterialDto, usuario);
   }
 
   // @Delete(':id')
