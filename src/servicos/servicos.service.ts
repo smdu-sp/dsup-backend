@@ -181,4 +181,13 @@ export class ServicosService {
     if (!material) throw new InternalServerErrorException('Não foi possível adicionar o material. Tente novamente.');
     return material;
   }
+
+  async removerMaterial(material_id: string, usuario: Usuario) {
+    const material = await this.prisma.material.findUnique({ where: { id: material_id }, include: { servico: true } });
+    if (!material) throw new ForbiddenException('Material não encontrado.');
+    if (material.servico.tecnico_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    const removido = await this.prisma.material.delete({ where: { id: material_id } });
+    if (!removido) throw new InternalServerErrorException('Não foi possível remover o material. Tente novamente.');
+    return { status: true };
+  }
 }

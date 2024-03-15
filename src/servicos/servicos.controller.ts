@@ -73,8 +73,8 @@ export class ServicosController {
     return this.servicosService.adicionarMaterial(id, adicionarMaterialDto, usuario);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.servicosService.remove(+id);
-  // }
+  @Delete('remover-material/:id')
+  remove(@Param('id') material_id: string, @UsuarioAtual() usuario: Usuario) {
+    return this.servicosService.removerMaterial(material_id, usuario);
+  }
 }
