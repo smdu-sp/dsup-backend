@@ -46,16 +46,4 @@ export class UnidadesController {
   desativar(@Param('id') id: string) {
     return this.unidadesService.desativar(id);
   }
-
-  @Permissoes('DEV')
-  @Get('importar')
-  importar() {
-    return this.unidadesService.importar();
-  }
-
-  // @IsPublic()
-  // @Get('teste')
-  // testaConexao() {
-  //   return this.unidadesService.testaConexao();
-  // }
 }
