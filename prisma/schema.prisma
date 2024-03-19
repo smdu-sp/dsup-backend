@@ -108,7 +108,7 @@ model SugestaoMaterial {
 model Material {
   id          String @id @default(uuid())
   nome        String
-  quantidade  Int
+  quantidade  Float
   medida      String
 
   servico_id  String
