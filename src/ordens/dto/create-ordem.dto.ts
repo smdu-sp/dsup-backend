@@ -16,6 +16,9 @@ export class CreateOrdemDto {
     @IsString({ message: 'É necessário descrever o problema a receber o serviço!' })
     observacoes: string;
 
+    @IsString({ message: 'Campo telefone é obrigatório!' })
+    telefone: string;
+
     @IsNumber({}, { message: 'Nivel de prioridade inválido!' })
     prioridade?: number;
 }
