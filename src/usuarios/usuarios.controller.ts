@@ -31,6 +31,7 @@ export class UsuariosController {
   @Permissoes('ADM')
   @Get('buscar-tudo') //localhost:3000/usuarios/buscar-tudo
   buscarTudo(
+    @UsuarioAtual() usuario: Usuario,
     @Query('pagina') pagina?: string,
     @Query('limite') limite?: string,
     @Query('status') status?: string,
@@ -38,7 +39,7 @@ export class UsuariosController {
     @Query('permissao') permissao?: string,
     @Query('unidade_id') unidade_id?: string,
   ) {
-    return this.usuariosService.buscarTudo(+pagina, +limite, +status, busca, permissao, unidade_id);
+    return this.usuariosService.buscarTudo(usuario, +pagina, +limite, +status, busca, permissao, unidade_id);
   }
 
   @Permissoes('ADM')
@@ -57,13 +58,13 @@ export class UsuariosController {
     return this.usuariosService.atualizar(usuario, id, updateUsuarioDto);
   }
 
-  @Permissoes('ADM', 'TEC', 'USR')
+  @Permissoes('ADM', 'TEC')
   @Get('lista-completa')
   listaCompleta() {
     return this.usuariosService.listaCompleta();
   }
 
-  @Permissoes('SUP')
+  @Permissoes('ADM')
   @Delete('desativar/:id') //localhost:3000/usuarios/excluir/id
   excluir(@Param('id') id: string) {
     return this.usuariosService.excluir(id);

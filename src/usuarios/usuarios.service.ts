@@ -97,6 +97,7 @@ export class UsuariosService {
   }
 
   async buscarTudo(
+    usuario: Usuario = null,
     pagina: number = 1,
     limite: number = 10,
     status: number = 1,
@@ -113,7 +114,7 @@ export class UsuariosService {
       ]}),
       ...(unidade_id !== '' && { unidade_id }),
       ...(permissao !== '' && { permissao: $Enums.Permissao[permissao] }),
-      ...(status !== 4 && { status }),
+      ...(usuario.permissao !== 'DEV' ? { status: 1 } : (status !== 4 && { status })),
     };
     const total = await this.prisma.usuario.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
@@ -206,7 +207,11 @@ export class UsuariosService {
 
   async buscarNovo(login: string){
     const usuarioExiste = await this.buscarPorLogin(login);
-    if (usuarioExiste) throw new ForbiddenException('Login já cadastrado.');
+    if (usuarioExiste && usuarioExiste.status === 1) throw new ForbiddenException('Login já cadastrado.');
+    if (usuarioExiste && usuarioExiste.status !== 1){
+      const usuarioReativado = await this.prisma.usuario.update({ where: { id: usuarioExiste.id }, data: { status: 1 } });
+      return usuarioReativado;
+    }
     const rf = login.substring(1);
     const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
       where: {

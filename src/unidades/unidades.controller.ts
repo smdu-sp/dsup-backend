@@ -32,16 +32,19 @@ export class UnidadesController {
     return this.unidadesService.listaCompleta();
   }
 
+  @Permissoes('ADM')
   @Get('buscar-por-id/:id')
   buscarPorId(@Param('id') id: string) {
     return this.unidadesService.buscarPorId(id);
   }
 
+  @Permissoes('ADM')
   @Patch('atualizar/:id')
   atualizar(@Param('id') id: string, @Body() updateUnidadeDto: UpdateUnidadeDto) {
     return this.unidadesService.atualizar(id, updateUnidadeDto);
   }
 
+  @Permissoes('ADM')
   @Delete('desativar/:id')
   desativar(@Param('id') id: string) {
     return this.unidadesService.desativar(id);
