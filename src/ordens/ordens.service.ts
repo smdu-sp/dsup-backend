@@ -100,7 +100,12 @@ export class OrdensService {
       take: limite,
       include: {
         unidade: true,
-        solicitante: true
+        solicitante: true,
+        servicos: {
+          include: {
+            tecnico: true
+          }
+        }
       }
     });
     return {
