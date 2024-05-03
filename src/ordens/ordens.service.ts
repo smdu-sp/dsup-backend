@@ -52,7 +52,7 @@ export class OrdensService {
 
   async criar(createOrdemDto: CreateOrdemDto, solicitante: Usuario) {
     const id = await this.geraId();
-    const { unidade_id, andar, sala, tipo, observacoes, telefone, prioridade } = createOrdemDto;
+    const { unidade_id, andar, sala, tipo, observacoes, telefone, prioridade, tratar_com } = createOrdemDto;
     const chamadoAberto = await this.prisma.ordem.findFirst({
       where: {
         unidade_id,
@@ -63,7 +63,7 @@ export class OrdensService {
     const unidade = await this.prisma.unidade.findUnique({ where: { id: unidade_id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada');
     const novaOrdem = await this.prisma.ordem.create({
-      data: { id, unidade_id, solicitante_id: solicitante.id, andar, sala, tipo, observacoes, telefone, prioridade: prioridade ? prioridade : 1 }
+      data: { id, unidade_id, solicitante_id: solicitante.id, andar, sala, tipo, observacoes, telefone, tratar_com, prioridade: prioridade ? prioridade : 1 }
     });
     if (!novaOrdem) throw new InternalServerErrorException('Não foi possível criar o chamado. Tente novamente');
     return novaOrdem;

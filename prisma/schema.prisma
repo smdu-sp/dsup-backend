@@ -58,6 +58,7 @@ model Ordem {
   sala              String
   solicitante       Usuario   @relation(fields: [solicitante_id], references: [id])
   solicitante_id    String
+  tratar_com        String?
   telefone          String    @default("")
   data_solicitacao  DateTime  @default(now())
   tipo              Int       @default(0)

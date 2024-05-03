@@ -19,6 +19,9 @@ export class CreateOrdemDto {
     @IsString({ message: 'Campo telefone é obrigatório!' })
     telefone: string;
 
+    @IsString({ message: 'Você deve inserir um nome para tratar com!' })
+    tratar_com?: string;
+
     @IsNumber({}, { message: 'Nivel de prioridade inválido!' })
     prioridade?: number;
 }
