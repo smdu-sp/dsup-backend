@@ -4,6 +4,7 @@ import { OrdensController } from './ordens.controller';
 
 @Global()
 @Module({
+  imports: [],
   exports: [OrdensService],
   controllers: [OrdensController],
   providers: [OrdensService],

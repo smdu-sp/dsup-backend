@@ -113,12 +113,22 @@ export class ServicosService {
     if (!finalizado) throw new InternalServerErrorException('Não foi possível finalizar o chamado. Tente novamente.');
     const ordem = await this.prisma.ordem.update({
       where: { id: servico.ordem_id },
-      data: { status: 3 }
+      data: { status: 3 },
+      include: {
+        solicitante: true
+      }
     })
     if (!ordem) {
       await this.prisma.servico.update({ where: { id }, data: { status: 1 } });
       throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente.');
     }
+    const corpo = this.app.emailAtualizacaoChamado(
+      ordem.solicitante.nome.split(' ')[0], 
+      ordem.id, 
+      'Finalizado. Aguardando avaliação do solicitante.',
+      'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
+    );
+    await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
     return finalizado;
   }
 
@@ -142,6 +152,14 @@ export class ServicosService {
       await this.prisma.suspensao.delete({ where: { id: suspensao.id } });
       throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
     }
+    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id }, include: { solicitante: true } });
+    const corpo = this.app.emailAtualizacaoChamado(
+      ordem.solicitante.nome.split(' ')[0],
+      ordem.id,
+      `Serviço suspenso. Motivo: ${motivo}.`,
+      'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
+    );
+    await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
     return suspensao;
   }
 
@@ -163,6 +181,14 @@ export class ServicosService {
       await this.prisma.suspensao.update({ where: { id: suspensao.id }, data: { status: true, termino: null } });
       throw new InternalServerErrorException('Não foi possível suspender o chamado. Tente novamente.');
     }
+    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id }, include: { solicitante: true } });
+    const corpo = this.app.emailAtualizacaoChamado(
+      ordem.solicitante.nome.split(' ')[0], 
+      ordem.id, 
+      'Serviço retomado após suspensão.', 
+      'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
+    );
+    await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
     return suspensao;
   }
 

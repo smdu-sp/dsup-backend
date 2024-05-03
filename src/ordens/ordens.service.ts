@@ -10,7 +10,7 @@ import { Usuario } from '@prisma/client';
 export class OrdensService {
   constructor(
     private prisma: PrismaService,
-    private app: AppService
+    private app: AppService,
   ) {}
 
   async geraId() {
