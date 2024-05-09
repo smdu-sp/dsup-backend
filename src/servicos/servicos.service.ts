@@ -76,6 +76,13 @@ export class ServicosService {
       await this.prisma.servico.delete({ where: { id: novoServico.id } });
       throw new InternalServerErrorException('Não foi possível atualizar o chamado. Tente novamente.');
     }
+    const corpo = this.app.emailAtualizacaoChamado(
+      ordem.solicitante.nome.split(' ')[0], 
+      ordem.id, 
+      `Serviço atribuído ao técnico`,
+      'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
+    );
+    await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
     return novoServico;
   }
 
@@ -125,7 +132,7 @@ export class ServicosService {
     const corpo = this.app.emailAtualizacaoChamado(
       ordem.solicitante.nome.split(' ')[0], 
       ordem.id, 
-      'Finalizado. Aguardando avaliação do solicitante.',
+      'Finalizado. Aguardando avaliação do solicitante',
       'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
     );
     await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
@@ -156,7 +163,7 @@ export class ServicosService {
     const corpo = this.app.emailAtualizacaoChamado(
       ordem.solicitante.nome.split(' ')[0],
       ordem.id,
-      `Serviço suspenso. Motivo: ${motivo}.`,
+      `Serviço suspenso. Motivo: ${motivo}`,
       'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
     );
     await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
@@ -185,7 +192,7 @@ export class ServicosService {
     const corpo = this.app.emailAtualizacaoChamado(
       ordem.solicitante.nome.split(' ')[0], 
       ordem.id, 
-      'Serviço retomado após suspensão.', 
+      'Serviço retomado após suspensão', 
       'DSUP Chamados', `${process.env.URL_BASE_FRONTEND}/chamados/detalhes/${ordem.id}`
     );
     await this.app.enviaEmail(`#${ordem.id} Atualização de Chamado`, corpo, [ordem.solicitante.email]);
