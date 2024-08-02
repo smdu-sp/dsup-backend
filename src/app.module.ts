@@ -9,12 +9,12 @@ import { RoleGuard } from './auth/guards/role.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { UnidadesModule } from './unidades/unidades.module';
 import { OrdensModule } from './ordens/ordens.module';
-import { Prisma2Module } from './prisma2/prisma2.module';
+import { SGUModule } from './sgu/sgu.module';
 import { ServicosModule } from './servicos/servicos.module';
 
 @Global()
 @Module({
-  imports: [UsuariosModule, AuthModule, PrismaModule, Prisma2Module, UnidadesModule, OrdensModule, ServicosModule],
+  imports: [UsuariosModule, AuthModule, PrismaModule, SGUModule, UnidadesModule, OrdensModule, ServicosModule],
   exports: [AppService],
   controllers: [AppController],
   providers: [
