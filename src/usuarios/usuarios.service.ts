@@ -10,7 +10,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { $Enums, Usuario } from '@prisma/client';
 import { AppService } from 'src/app.service';
-import { Prisma2Service } from 'src/sgu/sgu.service';
+import { SGUService } from 'src/sgu/sgu.service';
 import { Client, createClient } from 'ldapjs';
 
 @Global()
@@ -18,7 +18,7 @@ import { Client, createClient } from 'ldapjs';
 export class UsuariosService {
   constructor(
     private prisma: PrismaService,
-    private prisma2: Prisma2Service,
+    private prisma2: SGUService,
     private app: AppService,
   ) {}
 
