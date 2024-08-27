@@ -18,7 +18,7 @@ import { Client, createClient } from 'ldapjs';
 export class UsuariosService {
   constructor(
     private prisma: PrismaService,
-    private prisma2: SGUService,
+    private sgu: SGUService,
     private app: AppService,
   ) {}
 
@@ -72,7 +72,7 @@ export class UsuariosService {
     }
     var unidade_id = createUsuarioDto.unidade_id;
     if (!unidade_id){
-      const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
+      const usuario_sgu = await this.sgu.tblUsuarios.findFirst({
         where: {
           cpRF: { startsWith: createUsuarioDto.login.substring(1) },
         },
@@ -213,7 +213,7 @@ export class UsuariosService {
       return usuarioReativado;
     }
     const rf = login.substring(1);
-    const usuario_sgu = await this.prisma2.tblUsuarios.findFirst({
+    const usuario_sgu = await this.sgu.tblUsuarios.findFirst({
       where: {
         cpRF: { startsWith: rf },
       }
@@ -271,11 +271,92 @@ export class UsuariosService {
     });
     client.destroy();
     if (!usuario_ldap.email) throw new UnauthorizedException('Credenciais incorretas.');
+    if (unidade_id !== '')
+      return {
+        login,
+        nome: usuario_ldap.nome,
+        email: usuario_ldap.email,
+        unidade_id
+      };
     return {
       login,
       nome: usuario_ldap.nome,
-      email: usuario_ldap.email,
-      unidade_id
-    };
+      email: usuario_ldap.email
+    };    
+  }
+
+  async buscarLdap(login: string){
+    const client: Client = createClient({
+      url: process.env.LDAP_SERVER,
+    });
+    await new Promise<void>((resolve, reject) => {
+      client.bind(`${process.env.USER_LDAP}${process.env.LDAP_DOMAIN}`, process.env.PASS_LDAP, (err) => {
+        if (err) {
+          client.destroy();
+          reject(new UnauthorizedException('Credenciais incorretas 2.'));
+        }
+        resolve();
+      });
+    });
+    const usuario_ldap = await new Promise<{ nome: string, email: string, login: string } | string>((resolve, reject) => {
+      client.search(
+        process.env.LDAP_BASE,
+        {
+          filter: `(&(samaccountname=${login})(company=SMUL))`,
+          scope: 'sub',
+          attributes: ['name', 'mail'],
+        },
+        (err, res) => {
+          if (err) {
+            client.destroy();
+            resolve('erro');
+          }
+          res.on('searchEntry', async (entry) => {
+            const nome = JSON.stringify(
+              entry.pojo.attributes[0].values[0],
+            ).replaceAll('"', '');
+            const email = JSON.stringify(
+              entry.pojo.attributes[1].values[0],
+            ).replaceAll('"', '').toLowerCase();
+            resolve({ nome, email, login });
+          });
+          res.on('error', (err) => {
+            client.destroy();
+            resolve('erro');
+          });
+          res.on('end', () => {
+            client.destroy();
+            resolve('erro');
+          });
+        },
+      );
+    });
+    client.destroy();
+    return usuario_ldap;
+  }
+  
+  async adicionarUsuariosLista(){
+    const usuarios = ["8378649", "8110760", "9220593", "9306781", "8773327", "9219935", "8773297", "8112983", "9220518", "9220046", "6421971", "8599025", "9219897", "9220542", "9219901", "5792762", "9266844", "7830149", "7431716", "8110786", "8123004", "8794740", "8340234", "8550573", "8599068", "8252602", "6276555", "8503044", "9219447", "8794677", "9252738", "9220674", "9264914", "9236511", "9281606", "7544766", "8794758", "9237135", "8979154", "8908656", "9266623", "9112235", "6276644", "5584051", "8553475", "9236627", "5155053", "9219650", "5027381", "6534899", "9123679", "8064121", "8785104", "6373208", "8787018", "7999780", "7289278", "9281991", "7466579", "6041299", "8553483", "5088682", "8849081", "9300121", "8785392"];
+    for (let usuario of usuarios) {
+      const usuarioSgu = await this.sgu.tblUsuarios.findFirst({
+        where: { cpRF: usuario },
+        select: { cpUnid: true }
+      });
+      const usuarioLdap = await this.buscarLdap(`d${usuario.substring(0, 6)}`);
+      let cont = 0;
+      if (typeof usuarioLdap !== 'string') {
+        const { nome, email, login } = usuarioLdap;
+        const unidade = await this.prisma.unidade.findUnique({ where: { codigo: usuarioSgu.cpUnid } });
+        if (unidade) console.log(unidade.nome);
+        const usuarioNovo = await this.prisma.usuario.create({
+          data: { login, nome, email, ...(unidade ? { unidade_id: unidade.id } : {})}
+        })
+        if (usuarioNovo) {
+          console.log(`Adicionado ${login}`);
+          cont++;
+        }
+      }
+      console.log(`Foram adicionados ${cont} usuários.`);
+    }
   }
 }

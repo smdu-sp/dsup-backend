@@ -14,6 +14,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { Permissoes } from 'src/auth/decorators/permissoes.decorator';
 import { UsuarioAtual } from 'src/auth/decorators/usuario-atual.decorator';
 import { Usuario } from '@prisma/client';
+import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('usuarios') //localhost:3000/usuarios
 export class UsuariosController {
@@ -85,5 +86,11 @@ export class UsuariosController {
   @Get('buscar-novo')
   buscarNovo(@Query('login') login: string) {
     return this.usuariosService.buscarNovo(login);
+  }
+
+  @IsPublic()
+  @Get('registrar-lista')
+  adicionarUsuariosLista() {
+    return this.usuariosService.adicionarUsuariosLista();
   }
 }
