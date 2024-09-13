@@ -64,7 +64,7 @@ model Ordem {
   tipo              Int       @default(0)
   status            Int       @default(1)
   prioridade        Int       @default(1)
-  observacoes       String
+  observacoes       String    @db.Text
   servicos          Servico[]
 
   @@map("ordens")

@@ -105,6 +105,7 @@ export class OrdensService {
         unidade: true,
         solicitante: true,
         servicos: {
+          orderBy: { data_inicio: 'desc' },
           include: {
             tecnico: true
           }
