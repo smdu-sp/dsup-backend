@@ -31,7 +31,7 @@ model Usuario {
 
   ordens      Ordem[]
   servicos    Servico[]
-  unidade     Unidade?   @relation(fields: [unidade_id], references: [id])
+  unidade     Unidade?   @relation(fields: [unidade_id], references: [id], onDelete: Cascade)
   unidade_id  String?
 
   @@map("usuarios")
@@ -53,10 +53,10 @@ model Unidade {
 model Ordem {
   id                String    @id
   unidade_id        String
-  unidade           Unidade   @relation(fields: [unidade_id], references: [id])
+  unidade           Unidade   @relation(fields: [unidade_id], references: [id], onDelete: Cascade)
   andar             Int
   sala              String
-  solicitante       Usuario   @relation(fields: [solicitante_id], references: [id])
+  solicitante       Usuario   @relation(fields: [solicitante_id], references: [id], onDelete: Cascade)
   solicitante_id    String
   tratar_com        String?
   telefone          String    @default("")
@@ -72,14 +72,14 @@ model Ordem {
 
 model Servico {
   id                  String              @id @default(uuid())
-  tecnico             Usuario             @relation(fields: [tecnico_id], references: [id])
+  tecnico             Usuario             @relation(fields: [tecnico_id], references: [id], onDelete: Cascade)
   tecnico_id          String
   data_inicio         DateTime            @default(now())
   data_fim            DateTime?
   descricao           String?
   materiais           Material[]
   suspensoes          Suspensao[]
-  ordem               Ordem               @relation(fields: [ordem_id], references: [id])
+  ordem               Ordem               @relation(fields: [ordem_id], references: [id], onDelete: Cascade)
   ordem_id            String
   avaliado_em         DateTime?
   status              Int                 @default(1)
@@ -91,7 +91,7 @@ model Servico {
 model Suspensao {
   id                  String              @id @default(uuid())
   servico_id          String
-  servico             Servico             @relation(fields: [servico_id], references: [id])
+  servico             Servico             @relation(fields: [servico_id], references: [id], onDelete: Cascade)
   motivo              String
   inicio              DateTime            @default(now())
   termino             DateTime?
@@ -114,7 +114,7 @@ model Material {
   medida      String
 
   servico_id  String
-  servico     Servico @relation(fields: [servico_id], references: [id])
+  servico     Servico @relation(fields: [servico_id], references: [id], onDelete: Cascade)
 
   @@map("materiais")
 }
