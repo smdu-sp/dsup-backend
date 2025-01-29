@@ -91,7 +91,7 @@ export class OrdensService {
       ...(sala !== '' && { sala }),
       ...(andar !== 0 && { sala }),
       ...(tipo !== 0 && { tipo }),
-      ...(usuario.permissao === 'USR' && { solicitante_id: usuario.id }),
+      ...(usuario.permissao === 'USR' && { unidade_id: usuario.unidade_id }),
     };
     const total = await this.prisma.ordem.count({ where: searchParams });
     if (total == 0) return { total: 0, pagina: 0, limite: 0, users: [] };
@@ -120,9 +120,12 @@ export class OrdensService {
     };
   }
 
-  async buscarPorId(id: string) {
+  async buscarPorId(id: string, usuario?: Usuario) {
     const ordem = await this.prisma.ordem.findUnique({ 
-      where: { id },
+      where: { 
+        id,
+        ...(usuario.permissao === 'USR' && { unidade_id: usuario.unidade_id }),
+      },
       include: {
         solicitante: true,
         unidade: true,

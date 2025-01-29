@@ -22,9 +22,9 @@ export class ServicosService {
   async avaliarServico(id: string, avaliarServicoDto: AvaliarServicoDto, usuario: Usuario) {
     const servico = await this.prisma.servico.findUnique({ where: { id } });
     if (!servico) throw new ForbiddenException('Serviço não encontrado.');
-    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id } });
+    const ordem = await this.prisma.ordem.findUnique({ where: { id: servico.ordem_id }});
     if (!ordem) throw new ForbiddenException('Ordem não encontrada.');
-    if (ordem.solicitante_id !== usuario.id) throw new ForbiddenException('Operação não autorizada para este usuário.');
+    if (ordem.unidade_id !== usuario.unidade_id && ['USR', 'TEC'].includes(usuario.permissao)) throw new ForbiddenException('Operação não autorizada para este usuário.');
     const avaliado = await this.prisma.servico.update({
       where: { id },
       data: {

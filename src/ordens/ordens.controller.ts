@@ -31,8 +31,8 @@ export class OrdensController {
   }
 
   @Get('buscar-por-id/:id')
-  buscarPorId(@Param('id') id: string) {
-    return this.ordensService.buscarPorId(id);
+  buscarPorId(@UsuarioAtual() usuario: Usuario, @Param('id') id: string) {
+    return this.ordensService.buscarPorId(id, usuario);
   }
 
   @Patch('atualizar/:id')
