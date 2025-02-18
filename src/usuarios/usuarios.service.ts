@@ -347,7 +347,6 @@ export class UsuariosService {
       if (typeof usuarioLdap !== 'string') {
         const { nome, email, login } = usuarioLdap;
         const unidade = await this.prisma.unidade.findUnique({ where: { codigo: usuarioSgu.cpUnid } });
-        if (unidade) console.log(unidade.nome);
         const usuarioNovo = await this.prisma.usuario.create({
           data: { login, nome, email, ...(unidade ? { unidade_id: unidade.id } : {})}
         })

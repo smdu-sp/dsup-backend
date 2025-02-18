@@ -61,7 +61,6 @@ export class AppService {
         subject: assunto, // Subject line
         html: corpo
       });
-      console.log(enviado);
     } catch (error) {
       console.log(error);
     }
