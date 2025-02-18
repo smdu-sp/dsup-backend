@@ -59,7 +59,7 @@ export class ServicosService {
     }
     if (!tecnico_id) throw new ForbiddenException('Técnico não informado.');
     if (!ordem_id || ordem_id === '') throw new ForbiddenException('Ordem de Serviço não informada.');
-    const ordem = await this.ordens.buscarPorId(createServicoDto.ordem_id);
+    const ordem = await this.ordens.buscarPorId(createServicoDto.ordem_id, usuario);
     if (!ordem) throw new ForbiddenException('Ordem de Serviço não encontrada.');
     const novoServico = await this.prisma.servico.create({
       data: {
