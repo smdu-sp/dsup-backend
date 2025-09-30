@@ -53,16 +53,6 @@ export class OrdensService {
   async criar(createOrdemDto: CreateOrdemDto, solicitante: Usuario) {
     const id = await this.geraId();
     const { unidade_id, andar, sala, tipo, observacoes, telefone, prioridade, tratar_com } = createOrdemDto;
-    const chamadoAberto = await this.prisma.ordem.findFirst({
-      where: {
-        unidade_id,
-        status: 3
-      },
-      include: {
-        solicitante: true 
-      }
-    });
-    if (chamadoAberto) throw new ForbiddenException(`Não é possível abrir novo chamado, pois há um chamado pendente de avaliação pela unidade, aberto por: ${chamadoAberto.solicitante.nome}`);
     const unidade = await this.prisma.unidade.findUnique({ where: { id: unidade_id } });
     if (!unidade) throw new ForbiddenException('Unidade não encontrada');
     const novaOrdem = await this.prisma.ordem.create({
